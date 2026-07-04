@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import { Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ExamenCard } from '@/components/parciales/ExamenCard'

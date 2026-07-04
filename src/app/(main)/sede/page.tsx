@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { MapPin, Clock, Phone, BookOpen, Heart } from 'lucide-react'
+import { MapPin, Phone, BookOpen, Heart } from 'lucide-react'
 import type { InfoSede } from '@/types'
 
 const iconos: Record<string, React.ReactNode> = {

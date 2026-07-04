@@ -14,7 +14,7 @@ type SubirDocumentoInput = {
 }
 
 export async function subirDocumento(input: SubirDocumentoInput) {
-  const { carrera_id, materia_id, profesor_id, semestre, corte, archivo } = input
+  const { materia_id, profesor_id, semestre, corte, archivo } = input
 
   // Validaciones básicas
   if (!materia_id || !profesor_id || !semestre || !corte || !archivo) {

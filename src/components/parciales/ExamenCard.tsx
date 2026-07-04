@@ -1,7 +1,6 @@
-import Link from 'next/link'
 import { FileText, Download } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
-import { formatCorte, formatSemestre } from '@/lib/utils'
+import { formatCorte } from '@/lib/utils'
 import type { ColorCarrera } from '@/lib/constants'
 
 interface ExamenCardProps {

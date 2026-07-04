@@ -30,25 +30,37 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
   const [error,    setError]    = useState('')
   const [success,  setSuccess]  = useState(false)
 
+  function handleCarreraChange(id: string) {
+    setCarreraId(id)
+    setMateriaId('')
+    setMaterias([])
+    setProfesorId('')
+    setProfesores(profesoresIniciales)
+  }
+
   // Cargar materias cuando cambia la carrera
   useEffect(() => {
-    if (!carreraId) { setMaterias([]); setMateriaId(''); return }
+    if (!carreraId) return
     fetch(`/api/materias?carrera_id=${carreraId}`)
       .then((r) => r.json())
       .then(setMaterias)
       .catch(() => {})
-    setMateriaId('')
   }, [carreraId])
+
+  function handleMateriaChange(id: string) {
+    setMateriaId(id)
+    setProfesorId('')
+    if (!id) setProfesores(profesoresIniciales)
+  }
 
   // Filtrar profesores cuando cambia la materia
   useEffect(() => {
-    if (!materiaId) { setProfesores(profesoresIniciales); return }
+    if (!materiaId) return
     fetch(`/api/profesores?materia_id=${materiaId}`)
       .then((r) => r.json())
       .then((data) => setProfesores(data.length ? data : profesoresIniciales))
       .catch(() => {})
-    setProfesorId('')
-  }, [materiaId])
+  }, [materiaId, profesoresIniciales])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -75,13 +87,6 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
 
     if (!profId) { setError('Selecciona o escribe el nombre del profesor'); return }
 
-    // Obtener o crear oferta
-    const ofertaRes = await fetch('/api/documentos', {
-      method: 'POST',
-      // Enviar como FormData para incluir el archivo
-    })
-
-    // Preparar FormData para subir
     setLoading(true)
     try {
       // Primero obtener/crear la oferta
@@ -130,7 +135,7 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
         <select
           required
           value={carreraId}
-          onChange={(e) => setCarreraId(e.target.value)}
+          onChange={(e) => handleCarreraChange(e.target.value)}
           className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
         >
           <option value="">Selecciona una carrera</option>
@@ -144,7 +149,7 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
         <select
           required
           value={materiaId}
-          onChange={(e) => setMateriaId(e.target.value)}
+          onChange={(e) => handleMateriaChange(e.target.value)}
           disabled={!carreraId || materias.length === 0}
           className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo disabled:opacity-50"
         >
