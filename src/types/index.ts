@@ -17,7 +17,7 @@ export type Usuario = {
   correo_institucional: string
   nombre: string
   carrera_id: string | null
-  rol: 'estudiante' | 'egresado' | 'admin'
+  rol: 'usuario' | 'supervisor' | 'administrador'
   created_at: string
 }
 
