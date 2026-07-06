@@ -12,7 +12,7 @@ export function Logo({ className }: LogoProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-baseline font-mono font-bold tracking-tight text-tinta select-none',
+        'inline-flex items-baseline font-mono font-bold tracking-tight text-tinta select-none pt-[0.5em]',
         className
       )}
     >
@@ -22,7 +22,7 @@ export function Logo({ className }: LogoProps) {
         <svg
           viewBox="0 0 24 24"
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 -top-[0.85em] h-[0.85em] w-[0.85em] -translate-x-1/2 text-lapiz-rojo"
+          className="pointer-events-none absolute left-1/2 -top-[0.5em] h-[0.5em] w-[0.5em] -translate-x-1/2 text-lapiz-rojo"
         >
           <path
             d="M4 15 Q8.5 4 12 10 Q15.5 16 20 5"
