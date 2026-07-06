@@ -36,7 +36,10 @@ export default function RegistroPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { nombre } },
+      options: {
+        data: { nombre },
+        emailRedirectTo: `${window.location.origin}/auth/confirm?next=/explorar`,
+      },
     })
 
     if (error) {
