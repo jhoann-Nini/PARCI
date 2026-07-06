@@ -2,19 +2,18 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/lib/actions/auth'
 import { Button } from '@/components/ui/Button'
+import { Logo } from '@/components/ui/Logo'
 
 export async function Navbar() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-papel/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-linea bg-papel/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-mono text-xl font-bold tracking-tight text-tinta">
-            Parci
-          </span>
+          <Logo className="text-xl" />
           <span className="hidden text-xs text-tinta-suave sm:inline">
             Univalle · Tuluá
           </span>
@@ -35,7 +34,7 @@ export async function Navbar() {
           {user ? (
             <>
               <Link href="/subir">
-                <Button size="sm">Subir parcial</Button>
+                <Button variant="accent" size="sm">Subir parcial</Button>
               </Link>
               <form action={logout}>
                 <Button type="submit" variant="ghost" size="sm">

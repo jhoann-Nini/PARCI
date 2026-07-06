@@ -3,10 +3,10 @@ import { cn } from '@/lib/utils'
 type ColorCarrera = 'aula' | 'musgo' | 'ocre' | 'ciruela'
 
 const colorMap: Record<ColorCarrera, string> = {
-  aula:    'bg-aula/15    text-aula    border-aula/30',
-  musgo:   'bg-musgo/15   text-musgo   border-musgo/30',
-  ocre:    'bg-ocre/15    text-ocre    border-ocre/30',
-  ciruela: 'bg-ciruela/15 text-ciruela border-ciruela/30',
+  aula:    'bg-azul-aula/15   text-azul-aula   border-azul-aula/30',
+  musgo:   'bg-verde-musgo/15 text-verde-musgo border-verde-musgo/30',
+  ocre:    'bg-ocre/15        text-ocre        border-ocre/30',
+  ciruela: 'bg-ciruela/15     text-ciruela     border-ciruela/30',
 }
 
 interface BadgeProps {

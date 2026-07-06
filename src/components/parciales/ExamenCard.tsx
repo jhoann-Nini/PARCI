@@ -1,5 +1,7 @@
 import { FileText, Download } from 'lucide-react'
+import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { SemestreSello } from '@/components/ui/SemestreSello'
 import { formatCorte } from '@/lib/utils'
 import type { ColorCarrera } from '@/lib/constants'
 
@@ -14,29 +16,32 @@ interface ExamenCardProps {
   archivoUrl: string
 }
 
+const FRANJA_COLOR: Record<ColorCarrera, string> = {
+  aula:    'var(--color-azul-aula)',
+  musgo:   'var(--color-verde-musgo)',
+  ocre:    'var(--color-ocre)',
+  ciruela: 'var(--color-ciruela)',
+}
+
 export function ExamenCard({
   materia, profesor, carrera, carreraColor, semestre, corte, archivoUrl,
 }: ExamenCardProps) {
   return (
-    <article className="group relative flex flex-col gap-3 rounded-lg border bg-papel p-4 shadow-sm transition-shadow hover:shadow-md">
-      {/* Pestaña de carrera (parte superior izquierda) */}
+    <Card className="group relative flex flex-col gap-3 overflow-hidden p-4 transition-shadow hover:shadow-paper-sm">
+      {/* Franja de carrera */}
       <div
-        className="absolute -top-px left-4 h-1 w-16 rounded-b"
-        style={{
-          backgroundColor: `var(--color-${carreraColor})`,
-        }}
+        className="absolute top-0 left-0 h-1 w-full"
+        style={{ backgroundColor: FRANJA_COLOR[carreraColor] }}
       />
 
       {/* Icono de documento */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between pt-1">
         <div className="flex h-10 w-8 items-center justify-center rounded-sm border-2 border-dashed border-linea bg-papel">
           <FileText className="h-4 w-4 text-tinta-suave" />
         </div>
 
         {/* Sello de semestre */}
-        <span className="font-mono text-xs font-bold text-lapiz-rojo ring-1 ring-lapiz-rojo/30 rounded px-1.5 py-0.5">
-          {semestre}
-        </span>
+        <SemestreSello semestre={semestre} />
       </div>
 
       {/* Info */}
@@ -63,6 +68,6 @@ export function ExamenCard({
         <Download className="h-3.5 w-3.5" />
         Ver parcial
       </a>
-    </article>
+    </Card>
   )
 }

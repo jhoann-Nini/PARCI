@@ -1,7 +1,9 @@
+import Link from 'next/link'
 import { Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ExamenCard } from '@/components/parciales/ExamenCard'
 import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
 import type { ColorCarrera } from '@/lib/constants'
 
 interface SearchParams {
@@ -62,7 +64,7 @@ export default async function ExplorarPage({
         <select
           name="carrera_id"
           defaultValue={params.carrera_id ?? ''}
-          className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
+          className="h-10 rounded-md border border-linea bg-papel px-3 font-mono text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
         >
           <option value="">Todas las carreras</option>
           {carreras?.map((c) => (
@@ -73,7 +75,7 @@ export default async function ExplorarPage({
         <select
           name="corte"
           defaultValue={params.corte ?? ''}
-          className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
+          className="h-10 rounded-md border border-linea bg-papel px-3 font-mono text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
         >
           <option value="">Todos los cortes</option>
           <option value="quiz">Quiz</option>
@@ -82,12 +84,7 @@ export default async function ExplorarPage({
           <option value="final">Final</option>
         </select>
 
-        <button
-          type="submit"
-          className="h-10 rounded-md bg-tinta px-4 text-sm font-medium text-papel hover:bg-tinta/90 transition-colors"
-        >
-          Buscar
-        </button>
+        <Button type="submit">Buscar</Button>
       </form>
 
       {/* Filtros activos */}
@@ -106,12 +103,9 @@ export default async function ExplorarPage({
               ? `No encontramos parciales para "${params.q}"`
               : 'Aún no hay parciales. ¡Sé el primero en subir uno!'}
           </p>
-          <a
-            href="/subir"
-            className="mt-2 text-sm font-medium text-lapiz-rojo hover:underline"
-          >
-            Subir un parcial
-          </a>
+          <Link href="/subir" className="mt-2">
+            <Button variant="accent" size="sm">Subir un parcial</Button>
+          </Link>
         </div>
       ) : (
         <>

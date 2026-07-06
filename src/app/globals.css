@@ -13,18 +13,29 @@
   --color-resaltador:   #F2B705;
   --color-linea:        #DAD4C4;
 
-  /* Colores de carrera */
-  --color-aula:    #5B7C99;
-  --color-musgo:   #7C9070;
-  --color-ocre:    #A6763A;
-  --color-ciruela: #8A5A82;
+  /* Colores de categoría (pestañas de carrera — no son colores de marca) */
+  --color-azul-aula:  #5B7C99;
+  --color-verde-musgo: #7C9070;
+  --color-ocre:        #A6763A;
+  --color-ciruela:     #8A5A82;
 
-  /* Fondo cuadriculado (papel) */
-  --background-image-cuadricula: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M 32 0 L 0 0 0 32' fill='none' stroke='%23DAD4C4' stroke-width='0.6'/%3E%3C/svg%3E");
+  /* Fondo de papel cuadriculado — grilla fina repetida, no una imagen */
+  --background-image-cuadricula:
+    repeating-linear-gradient(
+      0deg, transparent, transparent 20px, #EFEBDF 20px, #EFEBDF 21px
+    ),
+    repeating-linear-gradient(
+      90deg, transparent, transparent 20px, #EFEBDF 20px, #EFEBDF 21px
+    );
+
+  /* Sombra "hoja de papel" — desplazada y nítida, sin blur */
+  --shadow-paper: 2px 2px 0 0 rgba(35, 38, 43, 0.14);
+  --shadow-paper-sm: 1.5px 1.5px 0 0 rgba(35, 38, 43, 0.12);
 }
 
 body {
   background-color: var(--color-papel);
+  background-image: var(--background-image-cuadricula);
   color: var(--color-tinta);
   font-family: var(--font-sans), system-ui, sans-serif;
 }

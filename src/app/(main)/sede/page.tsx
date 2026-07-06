@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { MapPin, Phone, BookOpen, Heart } from 'lucide-react'
+import { Card } from '@/components/ui/Card'
 import type { InfoSede } from '@/types'
 
 const iconos: Record<string, React.ReactNode> = {
@@ -46,7 +47,7 @@ export default async function SedePage() {
 
       <div className="grid gap-6 sm:grid-cols-2">
         {Object.entries(grouped).map(([categoria, infoItems]) => (
-          <div key={categoria} className="rounded-lg border bg-papel p-5 flex flex-col gap-4">
+          <Card key={categoria} className="flex flex-col gap-4 p-5">
             <div className="flex items-center gap-2 text-lapiz-rojo">
               {iconos[categoria]}
               <h2 className="font-mono text-sm font-bold uppercase tracking-wide">
@@ -57,12 +58,12 @@ export default async function SedePage() {
             <div className="flex flex-col gap-3">
               {infoItems.map((item) => (
                 <div key={item.id} className="flex flex-col gap-1">
-                  <p className="text-sm font-medium text-tinta">{item.titulo}</p>
+                  <p className="font-mono text-sm font-medium text-tinta">{item.titulo}</p>
                   <p className="text-sm text-tinta-suave leading-relaxed">{item.contenido}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>

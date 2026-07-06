@@ -120,7 +120,7 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
 
   if (success) {
     return (
-      <div className="rounded-lg border border-musgo/30 bg-musgo/10 p-6 text-center">
+      <div className="rounded border border-verde-musgo/30 bg-verde-musgo/10 p-6 text-center">
         <p className="font-mono text-lg font-bold text-tinta">¡Parcial subido!</p>
         <p className="mt-1 text-sm text-tinta-suave">Redirigiendo al explorador…</p>
       </div>
@@ -131,7 +131,7 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {/* Carrera */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-tinta">Carrera</label>
+        <label className="font-mono text-sm font-medium text-tinta">Carrera</label>
         <select
           required
           value={carreraId}
@@ -145,7 +145,7 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
 
       {/* Materia */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-tinta">Materia</label>
+        <label className="font-mono text-sm font-medium text-tinta">Materia</label>
         <select
           required
           value={materiaId}
@@ -160,7 +160,7 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
 
       {/* Profesor */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-tinta">Profesor</label>
+        <label className="font-mono text-sm font-medium text-tinta">Profesor</label>
         <select
           value={profesorId}
           onChange={(e) => setProfesorId(e.target.value)}
@@ -180,7 +180,7 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
 
       {/* Semestre */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-tinta">Semestre</label>
+        <label className="font-mono text-sm font-medium text-tinta">Semestre</label>
         <select
           required
           value={semestre}
@@ -194,14 +194,14 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
 
       {/* Corte */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-tinta">Corte</label>
+        <label className="font-mono text-sm font-medium text-tinta">Corte</label>
         <div className="grid grid-cols-4 gap-2">
           {CORTES.map((c) => (
             <button
               key={c.value}
               type="button"
               onClick={() => setCorte(c.value)}
-              className={`h-10 rounded-md border text-sm font-medium transition-colors ${
+              className={`h-10 rounded-md border font-mono text-sm font-medium transition-colors ${
                 corte === c.value
                   ? 'border-lapiz-rojo bg-lapiz-rojo text-papel'
                   : 'border-linea bg-papel text-tinta hover:border-tinta-suave'
@@ -215,7 +215,7 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
 
       {/* Archivo */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-tinta">Archivo PDF</label>
+        <label className="font-mono text-sm font-medium text-tinta">Archivo PDF</label>
         <label className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed border-linea p-6 hover:border-tinta-suave transition-colors">
           <span className="font-mono text-2xl text-tinta-suave">PDF</span>
           <span className="text-xs text-tinta-suave">
@@ -236,7 +236,7 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
         </p>
       )}
 
-      <Button type="submit" disabled={loading} className="mt-2">
+      <Button type="submit" variant="accent" disabled={loading} className="mt-2">
         {loading ? 'Subiendo…' : 'Subir parcial'}
       </Button>
     </form>

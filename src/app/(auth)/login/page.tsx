@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { Card } from '@/components/ui/Card'
+import { Logo } from '@/components/ui/Logo'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -33,16 +35,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-cuadricula bg-papel px-4">
-      <div className="w-full max-w-sm rounded-xl border bg-papel p-8 shadow-sm flex flex-col gap-6">
+    <div className="flex min-h-dvh items-center justify-center px-4">
+      <Card className="w-full max-w-sm p-8 flex flex-col gap-6">
         <div className="flex flex-col gap-1">
-          <Link href="/" className="font-mono text-2xl font-bold text-tinta">Parci</Link>
+          <Link href="/">
+            <Logo className="text-2xl" />
+          </Link>
           <p className="text-sm text-tinta-suave">Inicia sesión con tu correo institucional</p>
         </div>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-tinta">Correo institucional</label>
+            <label className="font-mono text-sm font-medium text-tinta">Correo institucional</label>
             <Input
               type="email"
               placeholder="usuario@correounivalle.edu.co"
@@ -53,7 +57,7 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-tinta">Contraseña</label>
+            <label className="font-mono text-sm font-medium text-tinta">Contraseña</label>
             <Input
               type="password"
               value={password}
@@ -77,7 +81,7 @@ export default function LoginPage() {
             Regístrate
           </Link>
         </p>
-      </div>
+      </Card>
     </div>
   )
 }

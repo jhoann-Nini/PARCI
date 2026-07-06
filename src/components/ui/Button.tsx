@@ -1,12 +1,13 @@
 import { cn } from '@/lib/utils'
 import { ButtonHTMLAttributes, forwardRef } from 'react'
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type Variant = 'primary' | 'secondary' | 'accent' | 'ghost' | 'danger'
 type Size    = 'sm' | 'md' | 'lg'
 
 const variants: Record<Variant, string> = {
   primary:   'bg-tinta text-papel hover:bg-tinta/90 active:scale-[.98]',
   secondary: 'bg-papel border border-linea text-tinta hover:border-tinta-suave',
+  accent:    'bg-resaltador text-[#4A3800] hover:bg-resaltador/90 active:scale-[.98]',
   ghost:     'text-tinta-suave hover:text-tinta hover:bg-linea/40',
   danger:    'bg-lapiz-rojo text-papel hover:bg-lapiz-rojo/90',
 }
