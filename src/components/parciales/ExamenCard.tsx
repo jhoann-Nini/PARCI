@@ -2,6 +2,7 @@ import { FileText, Download } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { SemestreSello } from '@/components/ui/SemestreSello'
+import { ReportarButton } from '@/components/parciales/ReportarButton'
 import { formatCorte } from '@/lib/utils'
 import type { ColorCarrera } from '@/lib/constants'
 
@@ -24,7 +25,7 @@ const FRANJA_COLOR: Record<ColorCarrera, string> = {
 }
 
 export function ExamenCard({
-  materia, profesor, carrera, carreraColor, semestre, corte, archivoUrl,
+  id, materia, profesor, carrera, carreraColor, semestre, corte, archivoUrl,
 }: ExamenCardProps) {
   return (
     <Card className="group relative flex flex-col gap-3 overflow-hidden p-4 transition-shadow hover:shadow-paper-sm">
@@ -59,15 +60,18 @@ export function ExamenCard({
       </div>
 
       {/* Acción */}
-      <a
-        href={archivoUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-auto flex items-center gap-1.5 text-xs font-medium text-lapiz-rojo hover:underline"
-      >
-        <Download className="h-3.5 w-3.5" />
-        Ver parcial
-      </a>
+      <div className="mt-auto flex items-center justify-between">
+        <a
+          href={archivoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-xs font-medium text-lapiz-rojo hover:underline"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Ver parcial
+        </a>
+        <ReportarButton documentoId={id} />
+      </div>
     </Card>
   )
 }
