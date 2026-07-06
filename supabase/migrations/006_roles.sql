@@ -11,10 +11,9 @@
 --   administra los roles de otros usuarios).
 -- ============================================================
 
--- Migrar datos existentes antes de cambiar el constraint
-update public.perfiles set rol = 'usuario'       where rol in ('estudiante', 'egresado');
-update public.perfiles set rol = 'administrador' where rol = 'admin';
-
+-- 1) Quitar el constraint viejo ANTES de tocar los datos: los
+--    nuevos valores ('usuario', 'administrador') no son válidos
+--    bajo el constraint anterior.
 do $$
 declare
   c_name text;
@@ -30,6 +29,12 @@ begin
   end if;
 end $$;
 
+-- 2) Migrar los datos existentes (sin constraint ni trigger de
+--    roles todavía activos, para que nada la revierta)
+update public.perfiles set rol = 'usuario'       where rol in ('estudiante', 'egresado');
+update public.perfiles set rol = 'administrador' where rol = 'admin';
+
+-- 3) Ahora sí, el constraint nuevo (ya validan todas las filas)
 alter table public.perfiles
   add constraint perfiles_rol_check
   check (rol in ('usuario', 'supervisor', 'administrador'));
@@ -113,8 +118,10 @@ create policy "Perfiles: admin actualiza cualquiera"
   using (public.is_admin())
   with check (public.is_admin());
 
--- Nadie puede auto-ascenderse de rol al editar su propio perfil:
--- si quien edita no es administrador, el cambio de rol se revierte.
+-- 4) Recién ahora el trigger anti-autoascenso: si se creara antes
+--    de migrar los datos (paso 2), is_admin() evalúa auth.uid() =
+--    null en el contexto del SQL Editor (sin JWT) y revertiría
+--    nuestras propias UPDATE de migración.
 create or replace function public.evitar_autoascenso_rol()
 returns trigger
 language plpgsql
