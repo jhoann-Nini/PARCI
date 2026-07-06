@@ -8,6 +8,16 @@ export async function Navbar() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  let esModerador = false
+  if (user) {
+    const { data: perfil } = await supabase
+      .from('perfiles')
+      .select('rol')
+      .eq('id', user.id)
+      .single()
+    esModerador = perfil ? ['supervisor', 'administrador'].includes(perfil.rol) : false
+  }
+
   return (
     <header className="sticky top-0 z-40 border-b border-linea bg-papel/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
@@ -27,6 +37,11 @@ export async function Navbar() {
           <Link href="/sede" className="hover:text-tinta transition-colors">
             Info de la sede
           </Link>
+          {esModerador && (
+            <Link href="/moderacion" className="hover:text-tinta transition-colors">
+              Moderación
+            </Link>
+          )}
         </nav>
 
         {/* Auth */}
