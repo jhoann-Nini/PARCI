@@ -66,14 +66,6 @@ export type DocumentoConContexto = Documento & {
   }
 }
 
-export type InfoSede = {
-  id: string
-  sede_id: string
-  categoria: 'biblioteca' | 'bienestar' | 'admisiones' | 'contacto' | 'mapa'
-  titulo: string
-  contenido: string
-}
-
 export type Reporte = {
   id: string
   documento_id: string | null

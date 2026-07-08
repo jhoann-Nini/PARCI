@@ -105,30 +105,3 @@ insert into public.ofertas (id, materia_id, profesor_id, semestre) values
   ('40000000-0000-0000-0000-000000000005', '20000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000001', '2025-2'),
   ('40000000-0000-0000-0000-000000000006', '20000000-0000-0000-0000-000000000006', '30000000-0000-0000-0000-000000000007', '2025-2');
 
--- ────────────────────────────────────────────────────────────
--- INFO DE SEDE — contenido estático inicial
--- ────────────────────────────────────────────────────────────
-insert into public.info_sede (sede_id, categoria, titulo, contenido) values
-  ('00000000-0000-0000-0000-000000000001', 'biblioteca', 'Biblioteca — Horarios',
-    'Lunes a viernes: 7:00 a.m. – 8:00 p.m. | Sábados: 8:00 a.m. – 1:00 p.m. | Domingos y festivos: cerrado.'),
-
-  ('00000000-0000-0000-0000-000000000001', 'biblioteca', 'Biblioteca — Contacto',
-    'Teléfono: (602) 225-8888 ext. XXXX | Correo: biblioteca.tulua@correounivalle.edu.co'),
-
-  ('00000000-0000-0000-0000-000000000001', 'bienestar', 'Bienestar Universitario — Servicios',
-    'Orientación psicológica, deporte y recreación, cultura, salud. Consulta disponibilidad en la oficina de bienestar de la sede.'),
-
-  ('00000000-0000-0000-0000-000000000001', 'bienestar', 'Bienestar — Horarios',
-    'Lunes a viernes: 8:00 a.m. – 12:00 m. y 2:00 p.m. – 6:00 p.m.'),
-
-  ('00000000-0000-0000-0000-000000000001', 'admisiones', 'Admisiones — Proceso de inscripción',
-    'Las inscripciones se realizan a través del sistema de admisiones de la Universidad del Valle. Visita admisiones.univalle.edu.co para conocer los calendarios y requisitos.'),
-
-  ('00000000-0000-0000-0000-000000000001', 'admisiones', 'Admisiones — Contacto',
-    'Oficina de la sede: Carrera 27 # 48-144, Barrio Palermo, Tuluá. | Teléfono: (602) 225-8888'),
-
-  ('00000000-0000-0000-0000-000000000001', 'contacto', 'Contacto general',
-    'Sede Tuluá — Universidad del Valle | Carrera 27 # 48-144, Barrio Palermo | Tel: (602) 225-8888 | Web: univalle.edu.co'),
-
-  ('00000000-0000-0000-0000-000000000001', 'mapa', 'Cómo llegar',
-    'La sede está ubicada en el Barrio Palermo, Tuluá. Desde el centro puedes tomar las rutas urbanas que van hacia la Carrera 27. La sede queda a 10 minutos del terminal de transportes.');

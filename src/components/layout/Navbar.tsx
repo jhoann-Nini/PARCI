@@ -34,9 +34,6 @@ export async function Navbar() {
           <Link href="/explorar" className="hover:text-tinta transition-colors">
             Explorar
           </Link>
-          <Link href="/sede" className="hover:text-tinta transition-colors">
-            Info de la sede
-          </Link>
           {esModerador && (
             <Link href="/moderacion" className="hover:text-tinta transition-colors">
               Moderación
