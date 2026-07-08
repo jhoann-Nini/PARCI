@@ -1,16 +1,19 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ExamenCard } from '@/components/parciales/ExamenCard'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import type { ColorCarrera } from '@/lib/constants'
+import type { OrdenDocumentos } from '@/types'
 
 interface SearchParams {
   q?: string
   carrera_id?: string
   semestre?: string
   corte?: string
+  orden?: OrdenDocumentos
 }
 
 export default async function ExplorarPage({
@@ -20,6 +23,11 @@ export default async function ExplorarPage({
 }) {
   const params = await searchParams
   const supabase = await createClient()
+  const cookieStore = await cookies()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  const anonId = cookieStore.get('parci_anon_id')?.value ?? null
+  const orden: OrdenDocumentos = params.orden === 'utiles' ? 'utiles' : 'recientes'
 
   // Cargar carreras para filtros
   const { data: carreras } = await supabase
@@ -33,6 +41,8 @@ export default async function ExplorarPage({
     p_carrera_id: params.carrera_id || null,
     p_semestre:   params.semestre   || null,
     p_corte:      params.corte      || null,
+    p_orden:      orden,
+    p_anon_id:    anonId,
     p_limit:      24,
     p_offset:     0,
   })
@@ -84,11 +94,20 @@ export default async function ExplorarPage({
           <option value="final">Final</option>
         </select>
 
+        <select
+          name="orden"
+          defaultValue={orden}
+          className="h-10 rounded-md border border-linea bg-papel px-3 font-mono text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
+        >
+          <option value="recientes">Más recientes</option>
+          <option value="utiles">Más útiles</option>
+        </select>
+
         <Button type="submit">Buscar</Button>
       </form>
 
       {/* Filtros activos */}
-      {(params.q || params.carrera_id || params.corte) && (
+      {(params.q || params.carrera_id || params.corte || orden === 'utiles') && (
         <a href="/explorar" className="w-fit text-xs text-tinta-suave hover:text-lapiz-rojo underline">
           Limpiar filtros
         </a>
@@ -113,7 +132,11 @@ export default async function ExplorarPage({
             {documentos.length} parcial{documentos.length !== 1 ? 'es' : ''} encontrado{documentos.length !== 1 ? 's' : ''}
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {(documentos as Array<{id: string; materia_nombre: string; profesor_nombre: string; carrera_nombre: string; carrera_color: string; semestre: string; corte: string; archivo_url: string}>).map((doc) => (
+            {(documentos as Array<{
+              id: string; materia_nombre: string; profesor_nombre: string; carrera_nombre: string
+              carrera_color: string; semestre: string; corte: string; archivo_url: string
+              votos_count: number; comentarios_count: number; ya_voto: boolean
+            }>).map((doc) => (
               <ExamenCard
                 key={doc.id}
                 id={doc.id}
@@ -124,6 +147,10 @@ export default async function ExplorarPage({
                 semestre={doc.semestre}
                 corte={doc.corte}
                 archivoUrl={doc.archivo_url}
+                votosCount={doc.votos_count}
+                yaVoto={doc.ya_voto}
+                comentariosCount={doc.comentarios_count}
+                loggedIn={!!user}
               />
             ))}
           </div>

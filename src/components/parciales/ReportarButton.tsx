@@ -16,12 +16,11 @@ const MOTIVOS = [
 type Motivo = (typeof MOTIVOS)[number]
 type Estado = 'idle' | 'enviando' | 'enviado' | 'ya-reportado' | 'error'
 
-interface ReportarButtonProps {
-  documentoId: string
+type ReportarButtonProps = {
   className?: string
-}
+} & ({ documentoId: string; comentarioId?: never } | { comentarioId: string; documentoId?: never })
 
-export function ReportarButton({ documentoId, className }: ReportarButtonProps) {
+export function ReportarButton({ documentoId, comentarioId, className }: ReportarButtonProps) {
   const [open, setOpen] = useState(false)
   const [motivo, setMotivo] = useState<Motivo | ''>('')
   const [detalle, setDetalle] = useState('')
@@ -45,7 +44,11 @@ export function ReportarButton({ documentoId, className }: ReportarButtonProps) 
       const res = await fetch('/api/reportes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documento_id: documentoId, motivo: motivoFinal }),
+        body: JSON.stringify({
+          documento_id: documentoId,
+          comentario_id: comentarioId,
+          motivo: motivoFinal,
+        }),
       })
 
       if (res.status === 409) {
@@ -61,13 +64,15 @@ export function ReportarButton({ documentoId, className }: ReportarButtonProps) 
     }
   }
 
+  const etiqueta = comentarioId ? 'Reportar comentario' : 'Reportar documento'
+
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Reportar documento"
-        title="Reportar documento"
+        aria-label={etiqueta}
+        title={etiqueta}
         className={cn(
           'flex items-center text-tinta-suave hover:text-lapiz-rojo transition-colors',
           className
@@ -76,11 +81,11 @@ export function ReportarButton({ documentoId, className }: ReportarButtonProps) 
         <Flag className="h-3.5 w-3.5" />
       </button>
 
-      <Modal open={open} onClose={cerrar} title="Reportar documento">
+      <Modal open={open} onClose={cerrar} title={etiqueta}>
         {estado === 'enviado' ? (
-          <p className="text-sm text-tinta-suave">Gracias, revisaremos este documento pronto.</p>
+          <p className="text-sm text-tinta-suave">Gracias, revisaremos esto pronto.</p>
         ) : estado === 'ya-reportado' ? (
-          <p className="text-sm text-tinta-suave">Ya habías reportado este documento.</p>
+          <p className="text-sm text-tinta-suave">Ya habías reportado esto.</p>
         ) : (
           <form onSubmit={enviar} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">

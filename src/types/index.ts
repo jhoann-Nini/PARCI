@@ -76,11 +76,31 @@ export type InfoSede = {
 
 export type Reporte = {
   id: string
-  documento_id: string
-  usuario_id: string
+  documento_id: string | null
+  comentario_id: string | null
+  usuario_id: string | null
   motivo: string
   fecha: string
 }
+
+export type Voto = {
+  id: string
+  documento_id: string
+  usuario_id: string | null
+  anon_id: string | null
+  created_at: string
+}
+
+export type Comentario = {
+  id: string
+  contenido: string
+  created_at: string
+  updated_at: string
+  nombre_autor: string | null
+  es_propio: boolean
+}
+
+export type OrdenDocumentos = 'recientes' | 'utiles'
 
 export type FiltrosBusqueda = {
   query?: string
@@ -89,6 +109,7 @@ export type FiltrosBusqueda = {
   profesor_id?: string
   semestre?: string
   corte?: CorteDocumento
+  orden?: OrdenDocumentos
 }
 
 export type SubirDocumentoForm = {

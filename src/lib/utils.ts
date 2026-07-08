@@ -19,3 +19,11 @@ export function formatCorte(corte: string): string {
   }
   return labels[corte] ?? corte
 }
+
+export function formatFecha(fecha: string): string {
+  return new Date(fecha).toLocaleDateString('es-CO', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}

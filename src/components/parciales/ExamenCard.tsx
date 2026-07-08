@@ -3,6 +3,8 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { SemestreSello } from '@/components/ui/SemestreSello'
 import { ReportarButton } from '@/components/parciales/ReportarButton'
+import { VotoButton } from '@/components/parciales/VotoButton'
+import { ComentariosPanel } from '@/components/parciales/ComentariosPanel'
 import { formatCorte } from '@/lib/utils'
 import type { ColorCarrera } from '@/lib/constants'
 
@@ -15,6 +17,10 @@ interface ExamenCardProps {
   semestre:  string
   corte:     string
   archivoUrl: string
+  votosCount: number
+  yaVoto: boolean
+  comentariosCount: number
+  loggedIn: boolean
 }
 
 const FRANJA_COLOR: Record<ColorCarrera, string> = {
@@ -26,6 +32,7 @@ const FRANJA_COLOR: Record<ColorCarrera, string> = {
 
 export function ExamenCard({
   id, materia, profesor, carrera, carreraColor, semestre, corte, archivoUrl,
+  votosCount, yaVoto, comentariosCount, loggedIn,
 }: ExamenCardProps) {
   return (
     <Card className="group relative flex flex-col gap-3 overflow-hidden p-4 transition-shadow hover:shadow-paper-sm">
@@ -70,8 +77,22 @@ export function ExamenCard({
           <Download className="h-3.5 w-3.5" />
           Ver parcial
         </a>
-        <ReportarButton documentoId={id} />
+        <div className="flex items-center gap-2">
+          <VotoButton
+            documentoId={id}
+            votosInicial={votosCount}
+            yaVotoInicial={yaVoto}
+            loggedIn={loggedIn}
+          />
+          <ReportarButton documentoId={id} />
+        </div>
       </div>
+
+      <ComentariosPanel
+        documentoId={id}
+        comentariosCountInicial={comentariosCount}
+        loggedIn={loggedIn}
+      />
     </Card>
   )
 }
