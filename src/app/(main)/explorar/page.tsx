@@ -135,7 +135,7 @@ export default async function ExplorarPage({
             {(documentos as Array<{
               id: string; materia_nombre: string; profesor_nombre: string; carrera_nombre: string
               carrera_color: string; semestre: string; corte: string; archivo_url: string
-              votos_count: number; comentarios_count: number; ya_voto: boolean
+              votos_count: number; comentarios_count: number; ya_voto: boolean; subido_por: string | null
             }>).map((doc) => (
               <ExamenCard
                 key={doc.id}
@@ -151,6 +151,7 @@ export default async function ExplorarPage({
                 yaVoto={doc.ya_voto}
                 comentariosCount={doc.comentarios_count}
                 loggedIn={!!user}
+                esDueno={!!user && doc.subido_por === user.id}
               />
             ))}
           </div>

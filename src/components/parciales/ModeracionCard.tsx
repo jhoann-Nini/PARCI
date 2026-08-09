@@ -27,11 +27,11 @@ interface ModeracionCardProps {
   semestre: string
   corte: string
   archivoUrl: string
-  reportes: { id: string; motivo: string; fecha: string }[]
+  reportes?: { id: string; motivo: string; fecha: string }[]
 }
 
 export function ModeracionCard({
-  id, materia, profesor, carrera, carreraColor, semestre, corte, archivoUrl, reportes,
+  id, materia, profesor, carrera, carreraColor, semestre, corte, archivoUrl, reportes = [],
 }: ModeracionCardProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<'aprobar' | 'eliminar' | null>(null)
@@ -92,32 +92,36 @@ export function ModeracionCard({
         Ver parcial
       </a>
 
-      <div className="flex flex-col gap-1.5 rounded border border-lapiz-rojo/30 bg-lapiz-rojo/5 p-2.5">
-        <p className="flex items-center gap-1.5 font-mono text-xs font-bold text-lapiz-rojo">
-          <AlertTriangle className="h-3.5 w-3.5" />
-          {reportes.length} reporte{reportes.length !== 1 ? 's' : ''}
-        </p>
-        <ul className="flex flex-col gap-1">
-          {reportes.map((r) => (
-            <li key={r.id} className="text-xs text-tinta-suave">
-              «{r.motivo}»
-            </li>
-          ))}
-        </ul>
-      </div>
+      {reportes.length > 0 && (
+        <div className="flex flex-col gap-1.5 rounded border border-lapiz-rojo/30 bg-lapiz-rojo/5 p-2.5">
+          <p className="flex items-center gap-1.5 font-mono text-xs font-bold text-lapiz-rojo">
+            <AlertTriangle className="h-3.5 w-3.5" />
+            {reportes.length} reporte{reportes.length !== 1 ? 's' : ''}
+          </p>
+          <ul className="flex flex-col gap-1">
+            {reportes.map((r) => (
+              <li key={r.id} className="text-xs text-tinta-suave">
+                «{r.motivo}»
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {error && <p className="text-xs text-lapiz-rojo">{error}</p>}
 
       <div className="mt-auto flex gap-2 pt-1">
-        <Button
-          variant="secondary"
-          size="sm"
-          disabled={loading !== null}
-          onClick={() => resolver('activo', 'aprobar')}
-          className="flex-1"
-        >
-          {loading === 'aprobar' ? 'Aprobando…' : 'Aprobar'}
-        </Button>
+        {reportes.length > 0 && (
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={loading !== null}
+            onClick={() => resolver('activo', 'aprobar')}
+            className="flex-1"
+          >
+            {loading === 'aprobar' ? 'Aprobando…' : 'Aprobar'}
+          </Button>
+        )}
         <Button
           variant="danger"
           size="sm"

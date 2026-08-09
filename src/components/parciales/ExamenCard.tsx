@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { SemestreSello } from '@/components/ui/SemestreSello'
 import { ReportarButton } from '@/components/parciales/ReportarButton'
+import { EliminarPropioButton } from '@/components/parciales/EliminarPropioButton'
 import { VotoButton } from '@/components/parciales/VotoButton'
 import { ComentariosPanel } from '@/components/parciales/ComentariosPanel'
 import { formatCorte } from '@/lib/utils'
@@ -21,6 +22,7 @@ interface ExamenCardProps {
   yaVoto: boolean
   comentariosCount: number
   loggedIn: boolean
+  esDueno: boolean
 }
 
 const FRANJA_COLOR: Record<ColorCarrera, string> = {
@@ -32,7 +34,7 @@ const FRANJA_COLOR: Record<ColorCarrera, string> = {
 
 export function ExamenCard({
   id, materia, profesor, carrera, carreraColor, semestre, corte, archivoUrl,
-  votosCount, yaVoto, comentariosCount, loggedIn,
+  votosCount, yaVoto, comentariosCount, loggedIn, esDueno,
 }: ExamenCardProps) {
   return (
     <Card className="group relative flex flex-col gap-3 overflow-hidden p-4 transition-shadow hover:shadow-paper-sm">
@@ -85,6 +87,7 @@ export function ExamenCard({
             loggedIn={loggedIn}
           />
           <ReportarButton documentoId={id} />
+          {esDueno && <EliminarPropioButton documentoId={id} />}
         </div>
       </div>
 
