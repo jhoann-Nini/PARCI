@@ -20,12 +20,12 @@
 **Decisión:** Solo @correounivalle.edu.co puede registrarse
 **Razón:** Es el filtro anti-spam más simple disponible sin construir un sistema de moderación complejo desde el inicio.
 
-## ADR-006: Catálogo cerrado de profesores con autocomplete + creación
+## ADR-006: Catálogo cerrado de profesores con autocomplete + creación — ⚠️ Superada por [ADR-011](#adr-011-eliminación-del-profesor-de-toda-la-app)
 **Decisión:** Profesores viven en tabla `profesores`; se seleccionan con autocomplete y se puede crear uno nuevo si no existe
 **Razón:** Evita duplicados fragmentados ("J. Peña" vs "Julián Peña") que romperían la búsqueda por profesor.
 
-## ADR-007: Tabla OFERTAS como entidad central
-**Decisión:** La relación materia × profesor × semestre se guarda como una entidad propia (no como columnas repetidas en DOCUMENTOS)
+## ADR-007: Tabla OFERTAS como entidad central — actualizada por ADR-011
+**Decisión:** La relación materia × semestre se guarda como una entidad propia (no como columnas repetidas en DOCUMENTOS). Hasta ADR-011, el grano era materia × profesor × semestre.
 **Razón:** Un profesor puede dictar la misma materia en distintos semestres, y una materia puede tener distintos profesores. Normalizar esto evita inconsistencias y facilita filtros combinados.
 
 ## ADR-008: Moderación liviana desde el inicio
@@ -39,3 +39,7 @@
 ## ADR-010: Función SQL `buscar_documentos` para búsqueda
 **Decisión:** La búsqueda de documentos con joins completos se encapsula en una función PostgreSQL llamada via `supabase.rpc()`
 **Razón:** Evita repetir joins anidados de 4 tablas (documentos → ofertas → materias/profesores → carreras) en múltiples rutas. La función vive en la migración y es versionable.
+
+## ADR-011: Eliminación del profesor de toda la app
+**Decisión:** Se deja de registrar y mostrar el profesor en toda la app (catálogo, formulario de subida, búsqueda, tarjetas de documento). OFERTAS pasa de materia × profesor × semestre a solo materia × semestre; se elimina la tabla `profesores` y la columna `ofertas.profesor_id` (migración `016_quitar_profesores.sql`).
+**Razón:** Riesgo por derechos sobre el nombre de los docentes al asociar públicamente su nombre con material subido por terceros. Se prioriza reducir ese riesgo legal sobre la granularidad de búsqueda por profesor que ofrecía ADR-006/ADR-007.
