@@ -21,7 +21,6 @@ const FRANJA_COLOR: Record<ColorCarrera, string> = {
 interface ModeracionCardProps {
   id: string
   materia: string
-  profesor: string
   carrera: string
   carreraColor: ColorCarrera
   semestre: string
@@ -31,7 +30,7 @@ interface ModeracionCardProps {
 }
 
 export function ModeracionCard({
-  id, materia, profesor, carrera, carreraColor, semestre, corte, archivoUrl, reportes = [],
+  id, materia, carrera, carreraColor, semestre, corte, archivoUrl, reportes = [],
 }: ModeracionCardProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<'aprobar' | 'eliminar' | null>(null)
@@ -74,7 +73,6 @@ export function ModeracionCard({
 
       <div className="flex flex-col gap-1">
         <h3 className="font-mono text-sm font-semibold text-tinta leading-snug">{materia}</h3>
-        <p className="text-xs text-tinta-suave">{profesor}</p>
       </div>
 
       <div className="flex flex-wrap gap-1.5">

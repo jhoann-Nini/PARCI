@@ -8,7 +8,7 @@ const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin']
 export const metadata: Metadata = {
   title: 'Parci — Universidad del Valle, sede Tuluá',
   description:
-    'El banco de parciales de tu sede. Encuentra y sube exámenes anteriores organizados por carrera, materia y profesor.',
+    'El banco de parciales de tu sede. Encuentra y sube exámenes anteriores organizados por carrera y materia.',
   keywords: ['parciales', 'univalle', 'tuluá', 'exámenes', 'universidad del valle'],
 }
 

@@ -10,7 +10,6 @@ export async function GET(request: NextRequest) {
     p_query:       searchParams.get('q')           || undefined,
     p_carrera_id:  searchParams.get('carrera_id')  || undefined,
     p_materia_id:  searchParams.get('materia_id')  || undefined,
-    p_profesor_id: searchParams.get('profesor_id') || undefined,
     p_semestre:    searchParams.get('semestre')    || undefined,
     p_corte:       searchParams.get('corte')       || undefined,
     p_limit:       Number(searchParams.get('limit')  ?? 20),

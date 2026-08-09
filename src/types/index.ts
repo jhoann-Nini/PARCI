@@ -27,18 +27,11 @@ export type Materia = {
   carrera_id: string
 }
 
-export type Profesor = {
-  id: string
-  nombre: string
-}
-
 export type Oferta = {
   id: string
   materia_id: string
-  profesor_id: string
   semestre: string
   materia?: Materia
-  profesor?: Profesor
 }
 
 export type TipoDocumento = 'parcial' | 'taller' | 'apunte' | 'nota'
@@ -62,7 +55,6 @@ export type DocumentoConContexto = Documento & {
     materia: Materia & {
       carrera: Carrera
     }
-    profesor: Profesor
   }
 }
 
@@ -98,7 +90,6 @@ export type FiltrosBusqueda = {
   query?: string
   carrera_id?: string
   materia_id?: string
-  profesor_id?: string
   semestre?: string
   corte?: CorteDocumento
   orden?: OrdenDocumentos
@@ -107,7 +98,6 @@ export type FiltrosBusqueda = {
 export type SubirDocumentoForm = {
   carrera_id: string
   materia_id: string
-  profesor_id: string
   semestre: string
   corte: CorteDocumento
   archivo: File

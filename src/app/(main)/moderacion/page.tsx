@@ -11,7 +11,6 @@ type DocumentoReportado = {
   oferta: {
     semestre: string
     materia: { nombre: string; carrera: { nombre: string; color: ColorCarrera } } | null
-    profesor: { nombre: string } | null
   } | null
   reportes: { id: string; motivo: string; fecha: string }[]
 }
@@ -38,8 +37,7 @@ export default async function ModeracionPage() {
       id, corte, archivo_url, fecha_subida, estado,
       oferta:ofertas (
         semestre,
-        materia:materias ( nombre, carrera:carreras ( nombre, color ) ),
-        profesor:profesores ( nombre )
+        materia:materias ( nombre, carrera:carreras ( nombre, color ) )
       ),
       reportes ( id, motivo, fecha )
     `)
@@ -72,7 +70,6 @@ export default async function ModeracionPage() {
                 key={doc.id}
                 id={doc.id}
                 materia={doc.oferta?.materia?.nombre ?? '—'}
-                profesor={doc.oferta?.profesor?.nombre ?? '—'}
                 carrera={doc.oferta?.materia?.carrera?.nombre ?? '—'}
                 carreraColor={doc.oferta?.materia?.carrera?.color ?? 'aula'}
                 semestre={doc.oferta?.semestre ?? '—'}
@@ -102,7 +99,6 @@ export default async function ModeracionPage() {
                 key={doc.id}
                 id={doc.id}
                 materia={doc.oferta?.materia?.nombre ?? '—'}
-                profesor={doc.oferta?.profesor?.nombre ?? '—'}
                 carrera={doc.oferta?.materia?.carrera?.nombre ?? '—'}
                 carreraColor={doc.oferta?.materia?.carrera?.color ?? 'aula'}
                 semestre={doc.oferta?.semestre ?? '—'}

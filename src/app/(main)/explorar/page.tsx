@@ -55,7 +55,7 @@ export default async function ExplorarPage({
           Parciales de la sede
         </h1>
         <p className="text-sm text-tinta-suave">
-          Encuentra exámenes anteriores de tu carrera, materia y profesor.
+          Encuentra exámenes anteriores de tu carrera y materia.
         </p>
       </section>
 
@@ -66,7 +66,7 @@ export default async function ExplorarPage({
           <Input
             name="q"
             defaultValue={params.q}
-            placeholder="Busca por materia, profesor o carrera…"
+            placeholder="Busca por materia o carrera…"
             className="pl-9"
           />
         </div>
@@ -133,7 +133,7 @@ export default async function ExplorarPage({
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {(documentos as Array<{
-              id: string; materia_nombre: string; profesor_nombre: string; carrera_nombre: string
+              id: string; materia_nombre: string; carrera_nombre: string
               carrera_color: string; semestre: string; corte: string; archivo_url: string
               votos_count: number; comentarios_count: number; ya_voto: boolean; subido_por: string | null
             }>).map((doc) => (
@@ -141,7 +141,6 @@ export default async function ExplorarPage({
                 key={doc.id}
                 id={doc.id}
                 materia={doc.materia_nombre}
-                profesor={doc.profesor_nombre}
                 carrera={doc.carrera_nombre}
                 carreraColor={doc.carrera_color as ColorCarrera}
                 semestre={doc.semestre}

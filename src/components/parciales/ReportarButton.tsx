@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 
 const MOTIVOS = [
-  'No corresponde a esta materia/profesor',
+  'No corresponde a esta materia',
   'Contenido ilegible o incompleto',
   'Contenido inapropiado',
   'Otro',

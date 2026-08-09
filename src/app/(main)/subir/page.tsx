@@ -10,10 +10,10 @@ export default async function SubirPage() {
   // (la subida anónima también está soportada vía API pero no se expone en UI por ahora)
   if (!user) redirect('/login?next=/subir')
 
-  const [{ data: carreras }, { data: profesores }] = await Promise.all([
-    supabase.from('carreras').select('id, nombre, color').order('nombre'),
-    supabase.from('profesores').select('id, nombre').order('nombre'),
-  ])
+  const { data: carreras } = await supabase
+    .from('carreras')
+    .select('id, nombre, color')
+    .order('nombre')
 
   return (
     <div className="mx-auto max-w-xl flex flex-col gap-6">
@@ -24,10 +24,7 @@ export default async function SubirPage() {
         </p>
       </div>
 
-      <SubirForm
-        carreras={carreras ?? []}
-        profesoresIniciales={profesores ?? []}
-      />
+      <SubirForm carreras={carreras ?? []} />
     </div>
   )
 }

@@ -12,7 +12,6 @@ import type { ColorCarrera } from '@/lib/constants'
 interface ExamenCardProps {
   id: string
   materia:   string
-  profesor:  string
   carrera:   string
   carreraColor: ColorCarrera
   semestre:  string
@@ -33,7 +32,7 @@ const FRANJA_COLOR: Record<ColorCarrera, string> = {
 }
 
 export function ExamenCard({
-  id, materia, profesor, carrera, carreraColor, semestre, corte, archivoUrl,
+  id, materia, carrera, carreraColor, semestre, corte, archivoUrl,
   votosCount, yaVoto, comentariosCount, loggedIn, esDueno,
 }: ExamenCardProps) {
   return (
@@ -59,7 +58,6 @@ export function ExamenCard({
         <h3 className="font-mono text-sm font-semibold text-tinta leading-snug">
           {materia}
         </h3>
-        <p className="text-xs text-tinta-suave">{profesor}</p>
       </div>
 
       {/* Badges */}

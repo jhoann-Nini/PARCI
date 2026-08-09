@@ -3,28 +3,23 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import { SEMESTRES, CORTES, MAX_ARCHIVO_MB } from '@/lib/constants'
-import type { Carrera, Materia, Profesor } from '@/types'
+import type { Carrera, Materia } from '@/types'
 
 interface SubirFormProps {
   carreras: Pick<Carrera, 'id' | 'nombre' | 'color'>[]
-  profesoresIniciales: Pick<Profesor, 'id' | 'nombre'>[]
 }
 
-export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
+export function SubirForm({ carreras }: SubirFormProps) {
   const router = useRouter()
 
   const [carreraId,  setCarreraId]  = useState('')
   const [materiaId,  setMateriaId]  = useState('')
-  const [profesorId, setProfesorId] = useState('')
   const [semestre,   setSemestre]   = useState('')
   const [corte,      setCorte]      = useState('')
   const [archivo,    setArchivo]    = useState<File | null>(null)
-  const [nuevoProf,  setNuevoProf]  = useState('')
 
   const [materias,   setMaterias]   = useState<Pick<Materia, 'id' | 'nombre'>[]>([])
-  const [profesores, setProfesores] = useState(profesoresIniciales)
 
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState('')
@@ -34,8 +29,6 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
     setCarreraId(id)
     setMateriaId('')
     setMaterias([])
-    setProfesorId('')
-    setProfesores(profesoresIniciales)
   }
 
   // Cargar materias cuando cambia la carrera
@@ -47,21 +40,6 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
       .catch(() => {})
   }, [carreraId])
 
-  function handleMateriaChange(id: string) {
-    setMateriaId(id)
-    setProfesorId('')
-    if (!id) setProfesores(profesoresIniciales)
-  }
-
-  // Filtrar profesores cuando cambia la materia
-  useEffect(() => {
-    if (!materiaId) return
-    fetch(`/api/profesores?materia_id=${materiaId}`)
-      .then((r) => r.json())
-      .then((data) => setProfesores(data.length ? data : profesoresIniciales))
-      .catch(() => {})
-  }, [materiaId, profesoresIniciales])
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -71,29 +49,13 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
       setError(`El archivo no puede superar ${MAX_ARCHIVO_MB}MB`); return
     }
 
-    let profId = profesorId
-
-    // Crear profesor nuevo si se escribió uno
-    if (!profId && nuevoProf.trim()) {
-      const res = await fetch('/api/profesores', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre: nuevoProf.trim() }),
-      })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error); return }
-      profId = data.id
-    }
-
-    if (!profId) { setError('Selecciona o escribe el nombre del profesor'); return }
-
     setLoading(true)
     try {
       // Primero obtener/crear la oferta
       const ofertaResponse = await fetch('/api/ofertas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ materia_id: materiaId, profesor_id: profId, semestre }),
+        body: JSON.stringify({ materia_id: materiaId, semestre }),
       })
       const ofertaData = await ofertaResponse.json()
       if (!ofertaResponse.ok) { setError(ofertaData.error); return }
@@ -149,33 +111,13 @@ export function SubirForm({ carreras, profesoresIniciales }: SubirFormProps) {
         <select
           required
           value={materiaId}
-          onChange={(e) => handleMateriaChange(e.target.value)}
+          onChange={(e) => setMateriaId(e.target.value)}
           disabled={!carreraId || materias.length === 0}
           className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo disabled:opacity-50"
         >
           <option value="">{carreraId ? 'Selecciona una materia' : 'Primero elige una carrera'}</option>
           {materias.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
         </select>
-      </div>
-
-      {/* Profesor */}
-      <div className="flex flex-col gap-1.5">
-        <label className="font-mono text-sm font-medium text-tinta">Profesor</label>
-        <select
-          value={profesorId}
-          onChange={(e) => setProfesorId(e.target.value)}
-          className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
-        >
-          <option value="">Selecciona un profesor</option>
-          {profesores.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-        </select>
-        {!profesorId && (
-          <Input
-            placeholder="O escribe el nombre si no está en la lista"
-            value={nuevoProf}
-            onChange={(e) => setNuevoProf(e.target.value)}
-          />
-        )}
       </div>
 
       {/* Semestre */}
