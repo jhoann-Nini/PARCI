@@ -61,6 +61,9 @@ export default function RegistroPage() {
             Revisa tu bandeja de entrada en{' '}
             <strong className="text-tinta">{email}</strong> y confirma tu cuenta.
           </p>
+          <p className="text-xs text-tinta-suave">
+            Si no lo ves en unos minutos, revisa tu carpeta de spam o correo no deseado.
+          </p>
           <Link href="/login" className="text-sm text-lapiz-rojo hover:underline">
             Volver al inicio de sesión
           </Link>
