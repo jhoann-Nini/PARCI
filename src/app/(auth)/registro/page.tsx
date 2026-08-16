@@ -33,7 +33,7 @@ export default function RegistroPage() {
     setLoading(true)
     const supabase = createClient()
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -44,6 +44,15 @@ export default function RegistroPage() {
 
     if (error) {
       setError(error.message)
+      setLoading(false)
+      return
+    }
+
+    // Supabase responde 200 sin error aunque el correo ya exista (evita
+    // enumeración), pero omite la identity en ese caso: es la única forma
+    // de distinguirlo del lado del cliente.
+    if (data.user?.identities?.length === 0) {
+      setError('Ese correo ya está registrado. Inicia sesión o recupera tu contraseña.')
       setLoading(false)
       return
     }
