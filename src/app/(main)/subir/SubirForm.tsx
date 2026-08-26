@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
+import { TemasInput } from '@/components/parciales/TemasInput'
 import { SEMESTRES, CORTES, MAX_ARCHIVO_MB } from '@/lib/constants'
 import type { Carrera, Materia } from '@/types'
 
@@ -18,6 +19,7 @@ export function SubirForm({ carreras }: SubirFormProps) {
   const [semestre,   setSemestre]   = useState('')
   const [corte,      setCorte]      = useState('')
   const [archivo,    setArchivo]    = useState<File | null>(null)
+  const [temas,      setTemas]      = useState<string[]>([])
 
   const [materias,   setMaterias]   = useState<Pick<Materia, 'id' | 'nombre'>[]>([])
 
@@ -65,6 +67,7 @@ export function SubirForm({ carreras }: SubirFormProps) {
       fd.append('oferta_id', ofertaData.id)
       fd.append('tipo',      'parcial')
       fd.append('corte',     corte)
+      temas.forEach((t) => fd.append('temas', t))
 
       const res = await fetch('/api/documentos', { method: 'POST', body: fd })
       const data = await res.json()
@@ -153,6 +156,14 @@ export function SubirForm({ carreras }: SubirFormProps) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Temas cubiertos */}
+      <div className="flex flex-col gap-1.5">
+        <label className="font-mono text-sm font-medium text-tinta">
+          Temas cubiertos <span className="font-normal text-tinta-suave">(opcional)</span>
+        </label>
+        <TemasInput value={temas} onChange={setTemas} materiaId={materiaId} />
       </div>
 
       {/* Archivo */}

@@ -66,7 +66,7 @@ export default async function ExplorarPage({
           <Input
             name="q"
             defaultValue={params.q}
-            placeholder="Busca por materia o carrera…"
+            placeholder="Busca por materia, carrera o tema…"
             className="pl-9"
           />
         </div>
@@ -135,6 +135,7 @@ export default async function ExplorarPage({
             {(documentos as Array<{
               id: string; materia_nombre: string; carrera_nombre: string
               carrera_color: string; semestre: string; corte: string; archivo_url: string
+              temas: string[] | null
               votos_count: number; comentarios_count: number; ya_voto: boolean; subido_por: string | null
             }>).map((doc) => (
               <ExamenCard
@@ -146,6 +147,7 @@ export default async function ExplorarPage({
                 semestre={doc.semestre}
                 corte={doc.corte}
                 archivoUrl={doc.archivo_url}
+                temas={doc.temas}
                 votosCount={doc.votos_count}
                 yaVoto={doc.ya_voto}
                 comentariosCount={doc.comentarios_count}

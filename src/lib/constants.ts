@@ -14,6 +14,7 @@ export const DOMINIO_CORREO =
 
 export const MAX_ARCHIVO_MB = 15
 export const TIPOS_ARCHIVO_PERMITIDOS = ['application/pdf']
+export const MAX_TEMAS = 8
 
 export const COLORES_CARRERA = ['aula', 'musgo', 'ocre', 'ciruela'] as const
 export type ColorCarrera = (typeof COLORES_CARRERA)[number]

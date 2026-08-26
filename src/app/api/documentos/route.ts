@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { TIPOS_ARCHIVO_PERMITIDOS, MAX_ARCHIVO_MB, STORAGE_BUCKET } from '@/lib/constants'
+import { TIPOS_ARCHIVO_PERMITIDOS, MAX_ARCHIVO_MB, STORAGE_BUCKET, MAX_TEMAS } from '@/lib/constants'
 
 // GET /api/documentos — buscar documentos con filtros
 export async function GET(request: NextRequest) {
@@ -34,6 +34,11 @@ export async function POST(request: NextRequest) {
   const ofertaId   = formData.get('oferta_id')  as string | null
   const tipo       = (formData.get('tipo')       as string) || 'parcial'
   const corte      = formData.get('corte')       as string | null
+  const temasList  = formData.getAll('temas').map((t) => String(t).trim()).filter(Boolean)
+  const temasUnicos = [...new Set(temasList.map((t) => t.toLowerCase()))]
+    .map((low) => temasList.find((t) => t.toLowerCase() === low)!)
+    .slice(0, MAX_TEMAS)
+  const temas = temasUnicos.length ? temasUnicos : null
 
   // Validaciones
   if (!archivo || !ofertaId || !corte) {
@@ -81,8 +86,9 @@ export async function POST(request: NextRequest) {
       corte,
       archivo_url: urlData.publicUrl,
       subido_por:  user?.id ?? null,
+      temas,
     })
-    .select('id, tipo, corte, archivo_url, fecha_subida')
+    .select('id, tipo, corte, archivo_url, fecha_subida, temas')
     .single()
 
   if (error) {

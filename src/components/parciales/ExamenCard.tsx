@@ -1,10 +1,12 @@
-import { FileText, Download } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { TemaTag } from '@/components/ui/TemaTag'
 import { SemestreSello } from '@/components/ui/SemestreSello'
 import { ReportarButton } from '@/components/parciales/ReportarButton'
 import { EliminarPropioButton } from '@/components/parciales/EliminarPropioButton'
 import { VotoButton } from '@/components/parciales/VotoButton'
+import { DescargarButton } from '@/components/parciales/DescargarButton'
 import { ComentariosPanel } from '@/components/parciales/ComentariosPanel'
 import { formatCorte } from '@/lib/utils'
 import type { ColorCarrera } from '@/lib/constants'
@@ -17,6 +19,7 @@ interface ExamenCardProps {
   semestre:  string
   corte:     string
   archivoUrl: string
+  temas: string[] | null
   votosCount: number
   yaVoto: boolean
   comentariosCount: number
@@ -32,7 +35,7 @@ const FRANJA_COLOR: Record<ColorCarrera, string> = {
 }
 
 export function ExamenCard({
-  id, materia, carrera, carreraColor, semestre, corte, archivoUrl,
+  id, materia, carrera, carreraColor, semestre, corte, archivoUrl, temas,
   votosCount, yaVoto, comentariosCount, loggedIn, esDueno,
 }: ExamenCardProps) {
   return (
@@ -66,17 +69,18 @@ export function ExamenCard({
         <Badge>{formatCorte(corte)}</Badge>
       </div>
 
+      {/* Temas cubiertos */}
+      {temas && temas.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {temas.map((tema) => (
+            <TemaTag key={tema}>{tema}</TemaTag>
+          ))}
+        </div>
+      )}
+
       {/* Acción */}
       <div className="mt-auto flex items-center justify-between">
-        <a
-          href={archivoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-xs font-medium text-lapiz-rojo hover:underline"
-        >
-          <Download className="h-3.5 w-3.5" />
-          Ver parcial
-        </a>
+        <DescargarButton documentoId={id} archivoUrl={archivoUrl} loggedIn={loggedIn} />
         <div className="flex items-center gap-2">
           <VotoButton
             documentoId={id}

@@ -47,6 +47,7 @@ export type Documento = {
   subido_por: string | null
   estado: EstadoDocumento
   fecha_subida: string
+  temas: string[] | null
   oferta?: Oferta
 }
 
@@ -101,4 +102,5 @@ export type SubirDocumentoForm = {
   semestre: string
   corte: CorteDocumento
   archivo: File
+  temas?: string[]
 }
