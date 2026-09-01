@@ -134,7 +134,7 @@ export default async function ExplorarPage({
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {(documentos as Array<{
               id: string; materia_nombre: string; carrera_nombre: string
-              carrera_color: string; semestre: string; corte: string; archivo_url: string
+              carrera_color: string; semestre: string; corte: string
               temas: string[] | null
               votos_count: number; comentarios_count: number; ya_voto: boolean; subido_por: string | null
             }>).map((doc) => (
@@ -146,7 +146,6 @@ export default async function ExplorarPage({
                 carreraColor={doc.carrera_color as ColorCarrera}
                 semestre={doc.semestre}
                 corte={doc.corte}
-                archivoUrl={doc.archivo_url}
                 temas={doc.temas}
                 votosCount={doc.votos_count}
                 yaVoto={doc.ya_voto}

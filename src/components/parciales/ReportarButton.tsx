@@ -5,6 +5,7 @@ import { Flag } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
+import { getAnonId } from '@/lib/anonId'
 
 const MOTIVOS = [
   'No corresponde a esta materia',
@@ -48,6 +49,9 @@ export function ReportarButton({ documentoId, comentarioId, className }: Reporta
           documento_id: documentoId,
           comentario_id: comentarioId,
           motivo: motivoFinal,
+          // El servidor ignora este valor si hay sesión (usa auth.uid()).
+          // Si no hay sesión, es obligatorio para poder deduplicar.
+          anon_id: getAnonId(),
         }),
       })
 

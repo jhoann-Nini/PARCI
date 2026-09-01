@@ -18,7 +18,6 @@ interface ExamenCardProps {
   carreraColor: ColorCarrera
   semestre:  string
   corte:     string
-  archivoUrl: string
   temas: string[] | null
   votosCount: number
   yaVoto: boolean
@@ -35,7 +34,7 @@ const FRANJA_COLOR: Record<ColorCarrera, string> = {
 }
 
 export function ExamenCard({
-  id, materia, carrera, carreraColor, semestre, corte, archivoUrl, temas,
+  id, materia, carrera, carreraColor, semestre, corte, temas,
   votosCount, yaVoto, comentariosCount, loggedIn, esDueno,
 }: ExamenCardProps) {
   return (
@@ -80,7 +79,7 @@ export function ExamenCard({
 
       {/* Acción */}
       <div className="mt-auto flex items-center justify-between">
-        <DescargarButton documentoId={id} archivoUrl={archivoUrl} loggedIn={loggedIn} />
+        <DescargarButton documentoId={id} loggedIn={loggedIn} />
         <div className="flex items-center gap-2">
           <VotoButton
             documentoId={id}

@@ -6,7 +6,6 @@ import type { ColorCarrera } from '@/lib/constants'
 type DocumentoReportado = {
   id: string
   corte: string
-  archivo_url: string
   fecha_subida: string
   oferta: {
     semestre: string
@@ -34,7 +33,7 @@ export default async function ModeracionPage() {
   const { data: documentos } = await supabase
     .from('documentos')
     .select(`
-      id, corte, archivo_url, fecha_subida, estado,
+      id, corte, fecha_subida, estado,
       oferta:ofertas (
         semestre,
         materia:materias ( nombre, carrera:carreras ( nombre, color ) )
@@ -74,7 +73,6 @@ export default async function ModeracionPage() {
                 carreraColor={doc.oferta?.materia?.carrera?.color ?? 'aula'}
                 semestre={doc.oferta?.semestre ?? '—'}
                 corte={doc.corte}
-                archivoUrl={doc.archivo_url}
                 reportes={doc.reportes}
               />
             ))}
@@ -103,7 +101,6 @@ export default async function ModeracionPage() {
                 carreraColor={doc.oferta?.materia?.carrera?.color ?? 'aula'}
                 semestre={doc.oferta?.semestre ?? '—'}
                 corte={doc.corte}
-                archivoUrl={doc.archivo_url}
               />
             ))}
           </div>

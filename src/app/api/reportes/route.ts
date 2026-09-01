@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient()
 
   const body = await request.json()
-  const { documento_id, comentario_id, motivo } = body
+  const { documento_id, comentario_id, motivo, anon_id } = body
 
   if ((!documento_id && !comentario_id) || (documento_id && comentario_id) || !motivo?.trim()) {
     return NextResponse.json(
@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
       p_documento_id: documento_id ?? null,
       p_motivo: motivo.trim(),
       p_comentario_id: comentario_id ?? null,
+      p_anon_id: anon_id ?? null,
     })
     .single()
 

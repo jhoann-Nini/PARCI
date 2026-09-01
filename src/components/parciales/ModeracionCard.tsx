@@ -25,16 +25,32 @@ interface ModeracionCardProps {
   carreraColor: ColorCarrera
   semestre: string
   corte: string
-  archivoUrl: string
   reportes?: { id: string; motivo: string; fecha: string }[]
 }
 
 export function ModeracionCard({
-  id, materia, carrera, carreraColor, semestre, corte, archivoUrl, reportes = [],
+  id, materia, carrera, carreraColor, semestre, corte, reportes = [],
 }: ModeracionCardProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<'aprobar' | 'eliminar' | null>(null)
   const [error, setError] = useState('')
+  const [cargandoArchivo, setCargandoArchivo] = useState(false)
+
+  async function verArchivo() {
+    setCargandoArchivo(true)
+    setError('')
+    try {
+      const res = await fetch(`/api/moderacion/archivo?documento_id=${id}`)
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? 'No se pudo abrir el archivo')
+        return
+      }
+      window.open(data.url, '_blank', 'noopener,noreferrer')
+    } finally {
+      setCargandoArchivo(false)
+    }
+  }
 
   async function resolver(estado: 'activo' | 'eliminado', accion: 'aprobar' | 'eliminar') {
     setError('')
@@ -80,15 +96,15 @@ export function ModeracionCard({
         <Badge>{formatCorte(corte)}</Badge>
       </div>
 
-      <a
-        href={archivoUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1.5 text-xs font-medium text-lapiz-rojo hover:underline"
+      <button
+        type="button"
+        onClick={verArchivo}
+        disabled={cargandoArchivo}
+        className="flex items-center gap-1.5 text-xs font-medium text-lapiz-rojo hover:underline disabled:opacity-60"
       >
         <Download className="h-3.5 w-3.5" />
-        Ver parcial
-      </a>
+        {cargandoArchivo ? 'Abriendo…' : 'Ver parcial'}
+      </button>
 
       {reportes.length > 0 && (
         <div className="flex flex-col gap-1.5 rounded border border-lapiz-rojo/30 bg-lapiz-rojo/5 p-2.5">

@@ -44,6 +44,7 @@ export type Documento = {
   tipo: TipoDocumento
   corte: CorteDocumento
   archivo_url: string
+  archivo_path: string
   subido_por: string | null
   estado: EstadoDocumento
   fecha_subida: string

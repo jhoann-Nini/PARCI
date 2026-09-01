@@ -73,6 +73,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: uploadError.message }, { status: 500 })
   }
 
+  // Nota: el bucket es privado desde la migración 021, así que
+  // getPublicUrl() ya no es un link funcional para el público — se
+  // conserva solo como referencia histórica visible para
+  // moderadores. El acceso real de descarga usa archivo_path +
+  // una signed URL de corta duración emitida por /api/descargas.
   const { data: urlData } = supabase.storage
     .from(STORAGE_BUCKET)
     .getPublicUrl(fileName)
@@ -81,14 +86,15 @@ export async function POST(request: NextRequest) {
   const { data, error } = await supabase
     .from('documentos')
     .insert({
-      oferta_id:   ofertaId,
+      oferta_id:    ofertaId,
       tipo,
       corte,
-      archivo_url: urlData.publicUrl,
-      subido_por:  user?.id ?? null,
+      archivo_url:  urlData.publicUrl,
+      archivo_path: fileName,
+      subido_por:   user?.id ?? null,
       temas,
     })
-    .select('id, tipo, corte, archivo_url, fecha_subida, temas')
+    .select('id, tipo, corte, fecha_subida, temas')
     .single()
 
   if (error) {

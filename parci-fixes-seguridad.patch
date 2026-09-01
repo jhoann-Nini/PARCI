@@ -1,0 +1,675 @@
+diff --git a/src/app/(main)/explorar/page.tsx b/src/app/(main)/explorar/page.tsx
+index a9f6f79..a31bbbe 100644
+--- a/src/app/(main)/explorar/page.tsx
++++ b/src/app/(main)/explorar/page.tsx
+@@ -134,7 +134,7 @@ export default async function ExplorarPage({
+           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+             {(documentos as Array<{
+               id: string; materia_nombre: string; carrera_nombre: string
+-              carrera_color: string; semestre: string; corte: string; archivo_url: string
++              carrera_color: string; semestre: string; corte: string
+               temas: string[] | null
+               votos_count: number; comentarios_count: number; ya_voto: boolean; subido_por: string | null
+             }>).map((doc) => (
+@@ -146,7 +146,6 @@ export default async function ExplorarPage({
+                 carreraColor={doc.carrera_color as ColorCarrera}
+                 semestre={doc.semestre}
+                 corte={doc.corte}
+-                archivoUrl={doc.archivo_url}
+                 temas={doc.temas}
+                 votosCount={doc.votos_count}
+                 yaVoto={doc.ya_voto}
+diff --git a/src/app/(main)/moderacion/page.tsx b/src/app/(main)/moderacion/page.tsx
+index a88bf10..b86d1d8 100644
+--- a/src/app/(main)/moderacion/page.tsx
++++ b/src/app/(main)/moderacion/page.tsx
+@@ -6,7 +6,6 @@ import type { ColorCarrera } from '@/lib/constants'
+ type DocumentoReportado = {
+   id: string
+   corte: string
+-  archivo_url: string
+   fecha_subida: string
+   oferta: {
+     semestre: string
+@@ -34,7 +33,7 @@ export default async function ModeracionPage() {
+   const { data: documentos } = await supabase
+     .from('documentos')
+     .select(`
+-      id, corte, archivo_url, fecha_subida, estado,
++      id, corte, fecha_subida, estado,
+       oferta:ofertas (
+         semestre,
+         materia:materias ( nombre, carrera:carreras ( nombre, color ) )
+@@ -74,7 +73,6 @@ export default async function ModeracionPage() {
+                 carreraColor={doc.oferta?.materia?.carrera?.color ?? 'aula'}
+                 semestre={doc.oferta?.semestre ?? '—'}
+                 corte={doc.corte}
+-                archivoUrl={doc.archivo_url}
+                 reportes={doc.reportes}
+               />
+             ))}
+@@ -103,7 +101,6 @@ export default async function ModeracionPage() {
+                 carreraColor={doc.oferta?.materia?.carrera?.color ?? 'aula'}
+                 semestre={doc.oferta?.semestre ?? '—'}
+                 corte={doc.corte}
+-                archivoUrl={doc.archivo_url}
+               />
+             ))}
+           </div>
+diff --git a/src/app/api/descargas/route.ts b/src/app/api/descargas/route.ts
+index a9e173d..02f6223 100644
+--- a/src/app/api/descargas/route.ts
++++ b/src/app/api/descargas/route.ts
+@@ -1,8 +1,19 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { createClient } from '@/lib/supabase/server'
++import { createAdminClient } from '@/lib/supabase/admin'
++import { STORAGE_BUCKET } from '@/lib/constants'
+ 
+-// POST /api/descargas — registrar intento de descarga y validar el
+-// límite de descargas gratuitas (2 documentos distintos sin subir nada)
++// Vigencia corta a propósito: la URL firmada solo debe servir para
++// abrir el archivo en el momento; no debe quedar utilizable si se
++// copia o queda cacheada en el historial del navegador.
++const SIGNED_URL_TTL_SEGUNDOS = 60
++
++// POST /api/descargas — valida el límite de descargas gratuitas
++// (2 documentos distintos sin subir nada) y, solo si está permitido,
++// emite una signed URL de corta duración para el archivo real.
++// El bucket es privado (migración 021): sin pasar por aquí no hay
++// forma de llegar al PDF, a diferencia del esquema anterior donde
++// archivo_url ya venía en la búsqueda pública.
+ export async function POST(request: NextRequest) {
+   const supabase = await createClient()
+ 
+@@ -21,5 +32,34 @@ export async function POST(request: NextRequest) {
+     return NextResponse.json({ error: error.message }, { status: 500 })
+   }
+ 
+-  return NextResponse.json(data)
++  const { permitido } = data as { permitido: boolean }
++
++  if (!permitido) {
++    return NextResponse.json({ permitido: false })
++  }
++
++  // Documento activo: la misma condición que ya exige la policy
++  // pública de RLS, así que esto no abre nada que no estuviera
++  // disponible antes vía el buscador.
++  const { data: doc, error: docError } = await supabase
++    .from('documentos')
++    .select('archivo_path')
++    .eq('id', documento_id)
++    .eq('estado', 'activo')
++    .single()
++
++  if (docError || !doc) {
++    return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 })
++  }
++
++  const admin = createAdminClient()
++  const { data: signed, error: signError } = await admin.storage
++    .from(STORAGE_BUCKET)
++    .createSignedUrl(doc.archivo_path, SIGNED_URL_TTL_SEGUNDOS)
++
++  if (signError || !signed) {
++    return NextResponse.json({ error: 'No se pudo generar el enlace de descarga' }, { status: 500 })
++  }
++
++  return NextResponse.json({ permitido: true, url: signed.signedUrl })
+ }
+diff --git a/src/app/api/documentos/route.ts b/src/app/api/documentos/route.ts
+index 22564ec..002df2e 100644
+--- a/src/app/api/documentos/route.ts
++++ b/src/app/api/documentos/route.ts
+@@ -73,6 +73,11 @@ export async function POST(request: NextRequest) {
+     return NextResponse.json({ error: uploadError.message }, { status: 500 })
+   }
+ 
++  // Nota: el bucket es privado desde la migración 021, así que
++  // getPublicUrl() ya no es un link funcional para el público — se
++  // conserva solo como referencia histórica visible para
++  // moderadores. El acceso real de descarga usa archivo_path +
++  // una signed URL de corta duración emitida por /api/descargas.
+   const { data: urlData } = supabase.storage
+     .from(STORAGE_BUCKET)
+     .getPublicUrl(fileName)
+@@ -81,14 +86,15 @@ export async function POST(request: NextRequest) {
+   const { data, error } = await supabase
+     .from('documentos')
+     .insert({
+-      oferta_id:   ofertaId,
++      oferta_id:    ofertaId,
+       tipo,
+       corte,
+-      archivo_url: urlData.publicUrl,
+-      subido_por:  user?.id ?? null,
++      archivo_url:  urlData.publicUrl,
++      archivo_path: fileName,
++      subido_por:   user?.id ?? null,
+       temas,
+     })
+-    .select('id, tipo, corte, archivo_url, fecha_subida, temas')
++    .select('id, tipo, corte, fecha_subida, temas')
+     .single()
+ 
+   if (error) {
+diff --git a/src/app/api/moderacion/archivo/route.ts b/src/app/api/moderacion/archivo/route.ts
+new file mode 100644
+index 0000000..92f9bde
+--- /dev/null
++++ b/src/app/api/moderacion/archivo/route.ts
+@@ -0,0 +1,50 @@
++import { NextRequest, NextResponse } from 'next/server'
++import { createClient } from '@/lib/supabase/server'
++import { createAdminClient } from '@/lib/supabase/admin'
++import { STORAGE_BUCKET } from '@/lib/constants'
++
++const SIGNED_URL_TTL_SEGUNDOS = 120
++
++// GET /api/moderacion/archivo?documento_id=... — signed URL para que
++// un moderador revise un documento reportado, sin pasar por el
++// límite de "2 descargas gratis" (eso es para el público, no para
++// quien está moderando). Requiere ser supervisor/administrador:
++// is_moderador() ya vive en la base y es la misma función que usan
++// las policies de RLS, así que el criterio queda en un solo lugar.
++export async function GET(request: NextRequest) {
++  const { searchParams } = new URL(request.url)
++  const documentoId = searchParams.get('documento_id')
++
++  if (!documentoId) {
++    return NextResponse.json({ error: 'Falta documento_id' }, { status: 400 })
++  }
++
++  const supabase = await createClient()
++
++  const { data: esModerador, error: rolError } = await supabase.rpc('is_moderador')
++
++  if (rolError || !esModerador) {
++    return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
++  }
++
++  const { data: doc, error: docError } = await supabase
++    .from('documentos')
++    .select('archivo_path')
++    .eq('id', documentoId)
++    .single()
++
++  if (docError || !doc) {
++    return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 })
++  }
++
++  const admin = createAdminClient()
++  const { data: signed, error: signError } = await admin.storage
++    .from(STORAGE_BUCKET)
++    .createSignedUrl(doc.archivo_path, SIGNED_URL_TTL_SEGUNDOS)
++
++  if (signError || !signed) {
++    return NextResponse.json({ error: 'No se pudo generar el enlace' }, { status: 500 })
++  }
++
++  return NextResponse.json({ url: signed.signedUrl })
++}
+diff --git a/src/app/api/reportes/route.ts b/src/app/api/reportes/route.ts
+index a76d31a..1dc35f0 100644
+--- a/src/app/api/reportes/route.ts
++++ b/src/app/api/reportes/route.ts
+@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
+   const supabase = await createClient()
+ 
+   const body = await request.json()
+-  const { documento_id, comentario_id, motivo } = body
++  const { documento_id, comentario_id, motivo, anon_id } = body
+ 
+   if ((!documento_id && !comentario_id) || (documento_id && comentario_id) || !motivo?.trim()) {
+     return NextResponse.json(
+@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
+       p_documento_id: documento_id ?? null,
+       p_motivo: motivo.trim(),
+       p_comentario_id: comentario_id ?? null,
++      p_anon_id: anon_id ?? null,
+     })
+     .single()
+ 
+diff --git a/src/components/parciales/DescargarButton.tsx b/src/components/parciales/DescargarButton.tsx
+index c22ea8e..ce4f388 100644
+--- a/src/components/parciales/DescargarButton.tsx
++++ b/src/components/parciales/DescargarButton.tsx
+@@ -9,11 +9,10 @@ import { getAnonId } from '@/lib/anonId'
+ 
+ interface DescargarButtonProps {
+   documentoId: string
+-  archivoUrl: string
+   loggedIn: boolean
+ }
+ 
+-export function DescargarButton({ documentoId, archivoUrl, loggedIn }: DescargarButtonProps) {
++export function DescargarButton({ documentoId, loggedIn }: DescargarButtonProps) {
+   const [loading, setLoading] = useState(false)
+   const [bloqueado, setBloqueado] = useState(false)
+ 
+@@ -32,9 +31,9 @@ export function DescargarButton({ documentoId, archivoUrl, loggedIn }: Descargar
+ 
+       if (!res.ok) return
+ 
+-      const data = (await res.json()) as { permitido: boolean }
+-      if (data.permitido) {
+-        window.open(archivoUrl, '_blank', 'noopener,noreferrer')
++      const data = (await res.json()) as { permitido: boolean; url?: string }
++      if (data.permitido && data.url) {
++        window.open(data.url, '_blank', 'noopener,noreferrer')
+       } else {
+         setBloqueado(true)
+       }
+diff --git a/src/components/parciales/ExamenCard.tsx b/src/components/parciales/ExamenCard.tsx
+index cbd3c26..eaf9e50 100644
+--- a/src/components/parciales/ExamenCard.tsx
++++ b/src/components/parciales/ExamenCard.tsx
+@@ -18,7 +18,6 @@ interface ExamenCardProps {
+   carreraColor: ColorCarrera
+   semestre:  string
+   corte:     string
+-  archivoUrl: string
+   temas: string[] | null
+   votosCount: number
+   yaVoto: boolean
+@@ -35,7 +34,7 @@ const FRANJA_COLOR: Record<ColorCarrera, string> = {
+ }
+ 
+ export function ExamenCard({
+-  id, materia, carrera, carreraColor, semestre, corte, archivoUrl, temas,
++  id, materia, carrera, carreraColor, semestre, corte, temas,
+   votosCount, yaVoto, comentariosCount, loggedIn, esDueno,
+ }: ExamenCardProps) {
+   return (
+@@ -80,7 +79,7 @@ export function ExamenCard({
+ 
+       {/* Acción */}
+       <div className="mt-auto flex items-center justify-between">
+-        <DescargarButton documentoId={id} archivoUrl={archivoUrl} loggedIn={loggedIn} />
++        <DescargarButton documentoId={id} loggedIn={loggedIn} />
+         <div className="flex items-center gap-2">
+           <VotoButton
+             documentoId={id}
+diff --git a/src/components/parciales/ModeracionCard.tsx b/src/components/parciales/ModeracionCard.tsx
+index c2640d9..b3ab51e 100644
+--- a/src/components/parciales/ModeracionCard.tsx
++++ b/src/components/parciales/ModeracionCard.tsx
+@@ -25,16 +25,32 @@ interface ModeracionCardProps {
+   carreraColor: ColorCarrera
+   semestre: string
+   corte: string
+-  archivoUrl: string
+   reportes?: { id: string; motivo: string; fecha: string }[]
+ }
+ 
+ export function ModeracionCard({
+-  id, materia, carrera, carreraColor, semestre, corte, archivoUrl, reportes = [],
++  id, materia, carrera, carreraColor, semestre, corte, reportes = [],
+ }: ModeracionCardProps) {
+   const router = useRouter()
+   const [loading, setLoading] = useState<'aprobar' | 'eliminar' | null>(null)
+   const [error, setError] = useState('')
++  const [cargandoArchivo, setCargandoArchivo] = useState(false)
++
++  async function verArchivo() {
++    setCargandoArchivo(true)
++    setError('')
++    try {
++      const res = await fetch(`/api/moderacion/archivo?documento_id=${id}`)
++      const data = await res.json()
++      if (!res.ok) {
++        setError(data.error ?? 'No se pudo abrir el archivo')
++        return
++      }
++      window.open(data.url, '_blank', 'noopener,noreferrer')
++    } finally {
++      setCargandoArchivo(false)
++    }
++  }
+ 
+   async function resolver(estado: 'activo' | 'eliminado', accion: 'aprobar' | 'eliminar') {
+     setError('')
+@@ -80,15 +96,15 @@ export function ModeracionCard({
+         <Badge>{formatCorte(corte)}</Badge>
+       </div>
+ 
+-      <a
+-        href={archivoUrl}
+-        target="_blank"
+-        rel="noopener noreferrer"
+-        className="flex items-center gap-1.5 text-xs font-medium text-lapiz-rojo hover:underline"
++      <button
++        type="button"
++        onClick={verArchivo}
++        disabled={cargandoArchivo}
++        className="flex items-center gap-1.5 text-xs font-medium text-lapiz-rojo hover:underline disabled:opacity-60"
+       >
+         <Download className="h-3.5 w-3.5" />
+-        Ver parcial
+-      </a>
++        {cargandoArchivo ? 'Abriendo…' : 'Ver parcial'}
++      </button>
+ 
+       {reportes.length > 0 && (
+         <div className="flex flex-col gap-1.5 rounded border border-lapiz-rojo/30 bg-lapiz-rojo/5 p-2.5">
+diff --git a/src/components/parciales/ReportarButton.tsx b/src/components/parciales/ReportarButton.tsx
+index f96af5b..4443592 100644
+--- a/src/components/parciales/ReportarButton.tsx
++++ b/src/components/parciales/ReportarButton.tsx
+@@ -5,6 +5,7 @@ import { Flag } from 'lucide-react'
+ import { Modal } from '@/components/ui/Modal'
+ import { Button } from '@/components/ui/Button'
+ import { cn } from '@/lib/utils'
++import { getAnonId } from '@/lib/anonId'
+ 
+ const MOTIVOS = [
+   'No corresponde a esta materia',
+@@ -48,6 +49,9 @@ export function ReportarButton({ documentoId, comentarioId, className }: Reporta
+           documento_id: documentoId,
+           comentario_id: comentarioId,
+           motivo: motivoFinal,
++          // El servidor ignora este valor si hay sesión (usa auth.uid()).
++          // Si no hay sesión, es obligatorio para poder deduplicar.
++          anon_id: getAnonId(),
+         }),
+       })
+ 
+diff --git a/src/lib/supabase/admin.ts b/src/lib/supabase/admin.ts
+new file mode 100644
+index 0000000..e77e187
+--- /dev/null
++++ b/src/lib/supabase/admin.ts
+@@ -0,0 +1,30 @@
++import { createClient as createSupabaseClient } from '@supabase/supabase-js'
++
++/**
++ * Cliente con la service_role key — bypassea RLS por completo.
++ *
++ * SOLO se usa en código server-side (API routes), NUNCA en un
++ * componente 'use client' ni en nada que llegue al bundle del
++ * navegador. La variable de entorno NO lleva prefijo NEXT_PUBLIC_
++ * a propósito: Next.js solo expone al cliente las variables que
++ * empiezan con ese prefijo, así que SUPABASE_SERVICE_ROLE_KEY queda
++ * fuera del bundle mientras nadie la renombre.
++ *
++ * Uso actual: emitir signed URLs de corta duración para el bucket
++ * privado 'documentos', solo después de que registrar_descarga()
++ * confirmó que la descarga está permitida (ver /api/descargas).
++ */
++export function createAdminClient() {
++  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
++  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
++
++  if (!url || !serviceRoleKey) {
++    throw new Error(
++      'Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY en las variables de entorno'
++    )
++  }
++
++  return createSupabaseClient(url, serviceRoleKey, {
++    auth: { autoRefreshToken: false, persistSession: false },
++  })
++}
+diff --git a/src/types/index.ts b/src/types/index.ts
+index 55241da..f31bc85 100644
+--- a/src/types/index.ts
++++ b/src/types/index.ts
+@@ -44,6 +44,7 @@ export type Documento = {
+   tipo: TipoDocumento
+   corte: CorteDocumento
+   archivo_url: string
++  archivo_path: string
+   subido_por: string | null
+   estado: EstadoDocumento
+   fecha_subida: string
+diff --git a/supabase/migrations/020_fix_reportes_anonimos.sql b/supabase/migrations/020_fix_reportes_anonimos.sql
+new file mode 100644
+index 0000000..729e0e5
+--- /dev/null
++++ b/supabase/migrations/020_fix_reportes_anonimos.sql
+@@ -0,0 +1,103 @@
++-- ============================================================
++-- FIX SEGURIDAD: los reportes anónimos no se deduplicaban.
++--
++-- Causa: usuario_id queda NULL para reportes anónimos, y en un
++-- unique index normal NULL nunca es igual a NULL — así que el
++-- índice (documento_id, usuario_id) nunca bloqueaba reportes
++-- anónimos repetidos. Cualquiera sin sesión podía llamar
++-- registrar_reporte() 3 veces seguidas contra el mismo documento
++-- y auto-ocultarlo (estado -> 'reportado'), sin límite de tasa.
++--
++-- Solución: mismo patrón que ya usan votos/comentarios — un
++-- anon_id (uuid persistido en cookie/localStorage del cliente) que
++-- sí se puede indexar de forma única por documento/comentario.
++-- No es antifraude fuerte (se evade borrando cookies), pero cierra
++-- el abuso trivial de un solo clic repetido / script simple, igual
++-- que ya se acepta como suficiente para votos.
++-- ============================================================
++
++alter table public.reportes
++  add column anon_id uuid;
++
++alter table public.reportes
++  add constraint reportes_autor_check check (
++    (usuario_id is not null and anon_id is null) or
++    (usuario_id is null and anon_id is not null)
++  );
++
++-- Un reporte por anon_id por documento / por comentario (índices
++-- parciales, mismo criterio que ya existe para usuario_id).
++create unique index reportes_documento_anon_key
++  on public.reportes (documento_id, anon_id)
++  where documento_id is not null and anon_id is not null;
++
++create unique index reportes_comentario_anon_key
++  on public.reportes (comentario_id, anon_id)
++  where comentario_id is not null and anon_id is not null;
++
++-- Reemplaza la policy de insert anónimo (009_reportar_documento.sql)
++-- para exigir anon_id en vez de aceptar cualquier reporte anónimo.
++drop policy if exists "Reportes: reporte anónimo permitido" on public.reportes;
++create policy "Reportes: reporte anónimo permitido"
++  on public.reportes for insert
++  with check (auth.uid() is null and usuario_id is null and anon_id is not null);
++
++-- registrar_reporte(): ahora acepta p_anon_id y lo usa tanto para
++-- el insert como para el conteo de "reportes distintos" (antes el
++-- conteo global de filas ya estaba bien porque cuenta filas, no
++-- autores distintos — eso no cambia; lo que cambia es que ahora sí
++-- se bloquea el reporte repetido del mismo anon_id).
++drop function if exists public.registrar_reporte(uuid, text, uuid);
++
++create or replace function public.registrar_reporte(
++  p_documento_id  uuid default null,
++  p_motivo        text default null,
++  p_comentario_id uuid default null,
++  p_anon_id       uuid default null
++)
++returns table (id uuid, ya_reportado boolean)
++language plpgsql
++security definer
++set search_path = public
++as $$
++declare
++  v_id    uuid;
++  v_count int;
++  v_uid   uuid := auth.uid();
++begin
++  if (p_documento_id is null) = (p_comentario_id is null) then
++    raise exception 'Debes indicar exactamente uno: documento_id o comentario_id';
++  end if;
++
++  if v_uid is null and p_anon_id is null then
++    raise exception 'anon_id requerido para reportar sin sesión';
++  end if;
++
++  begin
++    insert into public.reportes (documento_id, comentario_id, usuario_id, anon_id, motivo)
++    values (
++      p_documento_id,
++      p_comentario_id,
++      v_uid,
++      case when v_uid is null then p_anon_id else null end,
++      p_motivo
++    )
++    returning reportes.id into v_id;
++  exception when unique_violation then
++    return query select null::uuid, true;
++    return;
++  end;
++
++  if p_documento_id is not null then
++    select count(*) into v_count
++    from public.reportes
++    where documento_id = p_documento_id;
++
++    if v_count >= 3 then
++      update public.documentos set estado = 'reportado' where documentos.id = p_documento_id;
++    end if;
++  end if;
++
++  return query select v_id, false;
++end;
++$$;
+diff --git a/supabase/migrations/021_bucket_privado_descargas.sql b/supabase/migrations/021_bucket_privado_descargas.sql
+new file mode 100644
+index 0000000..4b46c68
+--- /dev/null
++++ b/supabase/migrations/021_bucket_privado_descargas.sql
+@@ -0,0 +1,135 @@
++-- ============================================================
++-- FIX SEGURIDAD: el bucket 'documentos' era público y su URL se
++-- devolvía en buscar_documentos() (usada por GET /api/documentos,
++-- el buscador público). Cualquiera podía leer archivo_url del
++-- JSON de búsqueda y descargar el PDF directo, sin pasar nunca
++-- por registrar_descarga() — el límite de "2 gratis" era cosmético,
++-- no un control de acceso real.
++--
++-- Solución:
++--   1) Bucket pasa a privado.
++--   2) Se guarda la ruta interna del objeto (archivo_path) además
++--      de la URL pública vieja (archivo_url, que ya no sirve para
++--      nada público — queda solo como referencia histórica /
++--      para uso de moderadores, que ya tienen acceso total a la
++--      tabla vía RLS).
++--   3) buscar_documentos() deja de devolver archivo_url: el
++--      público ya no puede llegar al archivo sin pasar por la
++--      API, que ahora emitirá una signed URL de corta duración
++--      SOLO si registrar_descarga() aprueba (ver cambio en
++--      /api/descargas en el código de la app).
++-- ============================================================
++
++-- 1) Bucket privado
++update storage.buckets set public = false where id = 'documentos';
++
++-- Ya no tiene sentido una policy de lectura pública sobre un
++-- bucket privado (nadie sin service_role puede leer igual), pero
++-- la quitamos explícitamente para que quede claro en el historial
++-- de policies que la lectura pública está cerrada.
++drop policy if exists "Storage documentos: lectura pública" on storage.objects;
++
++-- 2) Ruta interna del objeto, separada de la URL pública histórica
++alter table public.documentos add column archivo_path text;
++
++-- Backfill: la URL pública tiene forma
++-- https://.../storage/v1/object/public/documentos/<path>
++update public.documentos
++set archivo_path = regexp_replace(archivo_url, '^.*/object/public/documentos/', '')
++where archivo_path is null;
++
++alter table public.documentos alter column archivo_path set not null;
++
++-- 3) buscar_documentos(): mismo shape que 019, pero sin archivo_url
++-- (así el buscador público nunca vuelve a filtrar la ruta del archivo).
++drop function if exists public.buscar_documentos(text, uuid, uuid, text, text, text, uuid, int, int);
++
++create or replace function public.buscar_documentos(
++  p_query        text    default null,
++  p_carrera_id   uuid    default null,
++  p_materia_id   uuid    default null,
++  p_semestre     text    default null,
++  p_corte        text    default null,
++  p_orden        text    default 'recientes',
++  p_anon_id      uuid    default null,
++  p_limit        int     default 20,
++  p_offset       int     default 0
++)
++returns table (
++  id                uuid,
++  tipo              text,
++  corte             text,
++  subido_por        uuid,
++  fecha_subida      date,
++  temas             text[],
++  semestre          text,
++  materia_id        uuid,
++  materia_nombre    text,
++  carrera_id        uuid,
++  carrera_nombre    text,
++  carrera_color     text,
++  votos_count       int,
++  comentarios_count int,
++  ya_voto           boolean
++)
++language sql
++stable
++as $$
++  select
++    d.id,
++    d.tipo,
++    d.corte,
++    d.subido_por,
++    d.fecha_subida,
++    d.temas,
++    o.semestre,
++    m.id            as materia_id,
++    m.nombre        as materia_nombre,
++    c.id            as carrera_id,
++    c.nombre        as carrera_nombre,
++    c.color         as carrera_color,
++    coalesce(v.votos_count, 0)::int       as votos_count,
++    coalesce(cm.comentarios_count, 0)::int as comentarios_count,
++    exists (
++      select 1 from public.votos v2
++      where v2.documento_id = d.id
++        and (
++          (auth.uid() is not null and v2.usuario_id = auth.uid())
++          or (p_anon_id is not null and v2.anon_id = p_anon_id)
++        )
++    ) as ya_voto
++  from public.documentos d
++  join public.ofertas    o on o.id = d.oferta_id
++  join public.materias   m on m.id = o.materia_id
++  join public.carreras   c on c.id = m.carrera_id
++  left join (
++    select documento_id, count(*) as votos_count
++    from public.votos
++    group by documento_id
++  ) v on v.documento_id = d.id
++  left join (
++    select documento_id, count(*) as comentarios_count
++    from public.comentarios
++    group by documento_id
++  ) cm on cm.documento_id = d.id
++  where
++    d.estado = 'activo'
++    and (p_carrera_id  is null or c.id = p_carrera_id)
++    and (p_materia_id  is null or m.id = p_materia_id)
++    and (p_semestre    is null or o.semestre = p_semestre)
++    and (p_corte       is null or d.corte = p_corte)
++    and (
++      p_query is null
++      or m.nombre ilike '%' || p_query || '%'
++      or c.nombre ilike '%' || p_query || '%'
++      or exists (
++        select 1 from unnest(d.temas) as tema
++        where tema ilike '%' || p_query || '%'
++      )
++    )
++  order by
++    case when p_orden = 'utiles' then coalesce(v.votos_count, 0) end desc nulls last,
++    d.fecha_subida desc
++  limit  p_limit
++  offset p_offset;
++$$;

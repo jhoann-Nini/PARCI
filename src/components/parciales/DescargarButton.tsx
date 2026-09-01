@@ -9,11 +9,10 @@ import { getAnonId } from '@/lib/anonId'
 
 interface DescargarButtonProps {
   documentoId: string
-  archivoUrl: string
   loggedIn: boolean
 }
 
-export function DescargarButton({ documentoId, archivoUrl, loggedIn }: DescargarButtonProps) {
+export function DescargarButton({ documentoId, loggedIn }: DescargarButtonProps) {
   const [loading, setLoading] = useState(false)
   const [bloqueado, setBloqueado] = useState(false)
 
@@ -32,9 +31,9 @@ export function DescargarButton({ documentoId, archivoUrl, loggedIn }: Descargar
 
       if (!res.ok) return
 
-      const data = (await res.json()) as { permitido: boolean }
-      if (data.permitido) {
-        window.open(archivoUrl, '_blank', 'noopener,noreferrer')
+      const data = (await res.json()) as { permitido: boolean; url?: string }
+      if (data.permitido && data.url) {
+        window.open(data.url, '_blank', 'noopener,noreferrer')
       } else {
         setBloqueado(true)
       }
