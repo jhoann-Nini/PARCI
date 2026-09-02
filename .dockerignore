@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.gitignore
+.vercel
+.env*
+*.log
+.DS_Store
+*.tsbuildinfo
+parci-fixes-seguridad.patch
+README.md
+docs
+.claude
