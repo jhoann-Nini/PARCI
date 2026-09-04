@@ -31,6 +31,7 @@
   /* Sombra "hoja de papel" — desplazada y nítida, sin blur */
   --shadow-paper: 2px 2px 0 0 rgba(35, 38, 43, 0.14);
   --shadow-paper-sm: 1.5px 1.5px 0 0 rgba(35, 38, 43, 0.12);
+  --shadow-paper-lg: 4px 4px 0 0 rgba(35, 38, 43, 0.16);  
 }
 
 body {

@@ -11,7 +11,8 @@ export function Card({ className, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        'rounded border border-linea bg-white shadow-paper',
+        'rounded border border-linea bg-white shadow-paper transition-transform duration-150 ease-out',
+        'hover:-translate-y-0.5 hover:shadow-paper-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0',
         className
       )}
       {...props}

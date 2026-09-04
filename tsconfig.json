@@ -32,3 +32,12 @@
   ],
   "exclude": ["node_modules"]
 }
+
+//Esto es un archivo de configuración de TypeScript (tsconfig.json) que define las opciones del compilador y los archivos a incluir o excluir en un proyecto. Algunas de las configuraciones clave incluyen: 
+//- "target": "ES2017" establece la versión de JavaScript a la que se compilará el código TypeScript.
+//- "lib": ["dom", "dom.iterable", "esnext"] especifica las bibliotecas que se incluirán en el proyecto.
+//- "allowJs": true permite la inclusión de archivos JavaScript en el proyecto.
+//- "strict": true habilita todas las verificaciones estrictas de TypeScript.
+//- "noEmit": true indica que no se generarán archivos de salida
+//- "module": "esnext" y "moduleResolution": "bundler" configuran la resolución de módulos y el formato de salida.
+//- "jsx": "react-jsx" define el modo de transformación JSX para React.

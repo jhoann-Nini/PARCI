@@ -27,3 +27,16 @@ export function formatFecha(fecha: string): string {
     year: 'numeric',
   })
 }
+
+export function formatFechaRelativa(fecha: string): string {
+  const dias = Math.floor(
+    (Date.now() - new Date(fecha + 'T00:00:00').getTime()) / (1000 * 60 * 60 * 24)
+  )
+  if (dias <= 0) return 'Hoy'
+  if (dias === 1) return 'Ayer'
+  if (dias < 7) return `Hace ${dias} días`
+  if (dias < 30) return `Hace ${Math.floor(dias / 7)} sem`
+  return formatFecha(fecha)
+}
+
+
