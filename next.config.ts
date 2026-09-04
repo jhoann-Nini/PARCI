@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
+const isDockerBuild = process.env.BUILD_STANDALONE === "true";
+
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  ...(isDockerBuild && {
+    output: "standalone",
+  }),
 };
 
 export default nextConfig;
