@@ -1,11 +1,7 @@
 import type { NextConfig } from "next";
 
-const isDockerBuild = process.env.BUILD_STANDALONE === "true";
-
 const nextConfig: NextConfig = {
-  ...(isDockerBuild && {
-    output: "standalone",
-  }),
+  output: process.env.VERCEL ? undefined : "standalone",
 };
 
 export default nextConfig;
