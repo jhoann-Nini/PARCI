@@ -1,46 +1,37 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Tipografía */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-
-  /* Paleta Parci */
-  --color-papel:        #F1EEE4;
-  --color-tinta:        #23262B;
-  --color-tinta-suave:  #6B6459;
-  --color-lapiz-rojo:   #A83A24;
-  --color-resaltador:   #F2B705;
-  --color-linea:        #DAD4C4;
-
-  /* Colores de categoría (pestañas de carrera — no son colores de marca) */
-  --color-azul-aula:  #5B7C99;
+  --color-papel: #F1EEE4;
+  --color-tinta: #23262B;
+  --color-tinta-suave: #6B6459;
+  --color-lapiz-rojo: #A83A24;
+  --color-resaltador: #F2B705;
+  --color-linea: #DAD4C4;
+  --color-azul-aula: #5B7C99;
   --color-verde-musgo: #7C9070;
-  --color-ocre:        #A6763A;
-  --color-ciruela:     #8A5A82;
-
-  /* Fondo de papel cuadriculado — grilla fina repetida, no una imagen */
+  --color-ocre: #A6763A;
+  --color-ciruela: #8A5A82;
   --background-image-cuadricula:
-    repeating-linear-gradient(
-      0deg, transparent, transparent 20px, #EFEBDF 20px, #EFEBDF 21px
-    ),
-    repeating-linear-gradient(
-      90deg, transparent, transparent 20px, #EFEBDF 20px, #EFEBDF 21px
-    );
-
-  /* Sombra "hoja de papel" — desplazada y nítida, sin blur */
+    repeating-linear-gradient(0deg, transparent, transparent 20px, #EFEBDF 20px, #EFEBDF 21px),
+    repeating-linear-gradient(90deg, transparent, transparent 20px, #EFEBDF 20px, #EFEBDF 21px);
   --shadow-paper: 2px 2px 0 0 rgba(35, 38, 43, 0.14);
   --shadow-paper-sm: 1.5px 1.5px 0 0 rgba(35, 38, 43, 0.12);
-  --shadow-paper-lg: 4px 4px 0 0 rgba(35, 38, 43, 0.16);  
+  --shadow-paper-lg: 4px 4px 0 0 rgba(35, 38, 43, 0.16);
 }
 
+html { overflow-x: hidden; }
+
 body {
+  min-width: 320px;
+  overflow-x: hidden;
   background-color: var(--color-papel);
   background-image: var(--background-image-cuadricula);
   color: var(--color-tinta);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-* {
-  border-color: var(--color-linea);
-}
+button, a, input, select { -webkit-tap-highlight-color: transparent; }
+
+* { border-color: var(--color-linea); }
