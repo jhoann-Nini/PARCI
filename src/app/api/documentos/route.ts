@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import {
+  TIPOS_ARCHIVO_PERMITIDOS,
+  EXTENSIONES_ARCHIVO_PERMITIDAS,
+  MAX_ARCHIVO_MB,
+  STORAGE_BUCKET,
+  MAX_TEMAS,
+} from '@/lib/constants'
 import { createClient } from '@/lib/supabase/server'
-import { TIPOS_ARCHIVO_PERMITIDOS, MAX_ARCHIVO_MB, STORAGE_BUCKET, MAX_TEMAS } from '@/lib/constants'
 
 // GET /api/documentos — buscar documentos con filtros
 export async function GET(request: NextRequest) {
@@ -30,10 +36,10 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const formData = await request.formData()
 
-  const archivo    = formData.get('archivo')    as File | null
-  const ofertaId   = formData.get('oferta_id')  as string | null
-  const tipo       = (formData.get('tipo')       as string) || 'parcial'
-  const corte      = formData.get('corte')       as string | null
+  const archivo    = formData.get('archivo') as File | null
+  const ofertaId   = formData.get('oferta_id') as string | null
+  const tipo       = (formData.get('tipo') as string) || 'parcial'
+  const corte      = formData.get('corte') as string | null
   const temasList  = formData.getAll('temas').map((t) => String(t).trim()).filter(Boolean)
   const temasUnicos = [...new Set(temasList.map((t) => t.toLowerCase()))]
     .map((low) => temasList.find((t) => t.toLowerCase() === low)!)
@@ -48,8 +54,19 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  if (!TIPOS_ARCHIVO_PERMITIDOS.includes(archivo.type)) {
-    return NextResponse.json({ error: 'Solo se permiten archivos PDF' }, { status: 400 })
+  const extension = `.${archivo.name.split('.').pop()?.toLowerCase() ?? ''}`
+  const extensionPermitida = EXTENSIONES_ARCHIVO_PERMITIDAS.includes(
+    extension as (typeof EXTENSIONES_ARCHIVO_PERMITIDAS)[number]
+  )
+  const mimePermitido = TIPOS_ARCHIVO_PERMITIDOS.includes(
+    archivo.type as (typeof TIPOS_ARCHIVO_PERMITIDOS)[number]
+  )
+
+  if (!extensionPermitida || !mimePermitido) {
+    return NextResponse.json(
+      { error: 'Tipo de archivo no permitido. Usa PDF, imágenes JPG/PNG/WEBP o documentos Office.' },
+      { status: 400 }
+    )
   }
 
   if (archivo.size > MAX_ARCHIVO_MB * 1024 * 1024) {
@@ -62,8 +79,7 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Subir archivo a Supabase Storage
-  const ext      = archivo.name.split('.').pop()
-  const fileName = `${ofertaId}/${Date.now()}-${corte}.${ext}`
+  const fileName = `${ofertaId}/${Date.now()}-${corte}${extension}`
 
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKET)
@@ -73,11 +89,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: uploadError.message }, { status: 500 })
   }
 
-  // Nota: el bucket es privado desde la migración 021, así que
-  // getPublicUrl() ya no es un link funcional para el público — se
-  // conserva solo como referencia histórica visible para
-  // moderadores. El acceso real de descarga usa archivo_path +
-  // una signed URL de corta duración emitida por /api/descargas.
+  // El bucket es privado; la descarga pública se gestiona mediante
+  // una signed URL de corta duración en /api/descargas.
   const { data: urlData } = supabase.storage
     .from(STORAGE_BUCKET)
     .getPublicUrl(fileName)
