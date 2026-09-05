@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 
 const MAX_COMENTARIO_CHARS = 500
 
+type EliminacionComentario = { eliminado: boolean }
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const documento_id = searchParams.get('documento_id')
@@ -36,7 +38,7 @@ export async function DELETE(request: NextRequest) {
   if (!comentario_id) return NextResponse.json({ error: 'Falta comentario_id' }, { status: 400 })
   const { data, error } = await supabase.rpc('eliminar_comentario', {
     p_comentario_id: comentario_id, p_anon_id: anon_id ?? null,
-  }).single()
+  }).single<EliminacionComentario>()
   if (error) return NextResponse.json({ error: error.message }, { status: 403 })
   if (!data?.eliminado) return NextResponse.json({ error: 'No tienes permiso para eliminar este comentario' }, { status: 403 })
   return NextResponse.json({ eliminado: true })
