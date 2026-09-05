@@ -13,58 +13,18 @@ import { formatCorte } from '@/lib/utils'
 import type { ColorCarrera } from '@/lib/constants'
 
 interface ExamenCardProps {
-  id: string
-  materia: string
-  carrera: string
-  carreraColor: ColorCarrera
-  semestre: string
-  corte: string
-  temas: string[] | null
-  votosCount: number
-  yaVoto: boolean
-  comentariosCount: number
-  loggedIn: boolean
-  esDueno: boolean
+  id: string; materia: string; carrera: string; carreraColor: ColorCarrera; semestre: string; corte: string; temas: string[] | null
+  votosCount: number; yaVoto: boolean; comentariosCount: number; loggedIn: boolean; esDueno: boolean; archivoUrl?: string | null
 }
-
-const FRANJA_COLOR: Record<ColorCarrera, string> = {
-  aula: 'var(--color-azul-aula)', musgo: 'var(--color-verde-musgo)',
-  ocre: 'var(--color-ocre)', ciruela: 'var(--color-ciruela)',
-}
-
-export function ExamenCard({ id, materia, carrera, carreraColor, semestre, corte, temas,
-  votosCount, yaVoto, comentariosCount, loggedIn, esDueno }: ExamenCardProps) {
-  return (
-    <Card className="group relative flex flex-col gap-3 overflow-hidden p-4 transition-shadow hover:shadow-paper-sm">
-      <div className="absolute left-0 top-0 h-1 w-full" style={{ backgroundColor: FRANJA_COLOR[carreraColor] }} />
-      <div className="flex items-start justify-between gap-3 pt-1">
-        <div className="flex h-10 w-8 shrink-0 items-center justify-center rounded-sm border-2 border-dashed border-linea bg-papel">
-          <FileText className="h-4 w-4 text-tinta-suave" />
-        </div>
-        <div className="flex items-center gap-2">
-          <FavoritoButton documentoId={id} loggedIn={loggedIn} />
-          <SemestreSello semestre={semestre} />
-        </div>
-      </div>
-      <div className="flex flex-col gap-1">
-        <h3 className="font-mono text-sm font-semibold leading-snug text-tinta">{materia}</h3>
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        <Badge color={carreraColor}>{carrera}</Badge>
-        <Badge>{formatCorte(corte)}</Badge>
-      </div>
-      {temas && temas.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">{temas.map((tema) => <TemaTag key={tema}>{tema}</TemaTag>)}</div>
-      )}
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-2">
-        <DescargarButton documentoId={id} loggedIn={loggedIn} />
-        <div className="flex items-center gap-2">
-          <VotoButton documentoId={id} votosInicial={votosCount} yaVotoInicial={yaVoto} loggedIn={loggedIn} />
-          <ReportarButton documentoId={id} />
-          {esDueno && <EliminarPropioButton documentoId={id} />}
-        </div>
-      </div>
-      <ComentariosPanel documentoId={id} comentariosCountInicial={comentariosCount} loggedIn={loggedIn} />
-    </Card>
-  )
+const FRANJA_COLOR: Record<ColorCarrera, string> = { aula: 'var(--color-azul-aula)', musgo: 'var(--color-verde-musgo)', ocre: 'var(--color-ocre)', ciruela: 'var(--color-ciruela)' }
+export function ExamenCard({ id, materia, carrera, carreraColor, semestre, corte, temas, votosCount, yaVoto, comentariosCount, loggedIn, esDueno, archivoUrl }: ExamenCardProps) {
+  return <Card className="group relative flex flex-col gap-3 overflow-hidden p-4 transition-shadow hover:shadow-paper-sm">
+    <div className="absolute left-0 top-0 h-1 w-full" style={{ backgroundColor: FRANJA_COLOR[carreraColor] }} />
+    <div className="flex items-start justify-between gap-3 pt-1"><div className="flex h-10 w-8 shrink-0 items-center justify-center rounded-sm border-2 border-dashed border-linea bg-papel"><FileText className="h-4 w-4 text-tinta-suave" /></div><div className="flex items-center gap-2"><FavoritoButton documentoId={id} loggedIn={loggedIn} /><SemestreSello semestre={semestre} /></div></div>
+    <div className="flex flex-col gap-1"><h3 className="font-mono text-sm font-semibold leading-snug text-tinta">{materia}</h3></div>
+    <div className="flex flex-wrap gap-1.5"><Badge color={carreraColor}>{carrera}</Badge><Badge>{formatCorte(corte)}</Badge></div>
+    {temas && temas.length > 0 && <div className="flex flex-wrap gap-1.5">{temas.map((tema) => <TemaTag key={tema}>{tema}</TemaTag>)}</div>}
+    <div className="mt-auto flex flex-wrap items-center justify-between gap-2"><DescargarButton documentoId={id} loggedIn={loggedIn} archivoUrl={archivoUrl} /><div className="flex items-center gap-2"><VotoButton documentoId={id} votosInicial={votosCount} yaVotoInicial={yaVoto} loggedIn={loggedIn} /><ReportarButton documentoId={id} />{esDueno && <EliminarPropioButton documentoId={id} />}</div></div>
+    <ComentariosPanel documentoId={id} comentariosCountInicial={comentariosCount} loggedIn={loggedIn} />
+  </Card>
 }
