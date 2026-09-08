@@ -8,8 +8,11 @@ const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin']
 export const metadata: Metadata = {
   title: 'Parci — Universidad del Valle, sede Tuluá',
   description:
-    'El banco de parciales de tu sede. Encuentra y sube exámenes anteriores organizados por carrera y materia.',
+    'Banco de Parciales. Encuentra y sube exámenes anteriores organizados por carrera y materia.',
   keywords: ['parciales', 'univalle', 'tuluá', 'exámenes', 'universidad del valle'],
+  verification: {
+    google: '-eZBvRQrIpS34-T9hN5W7lGhAXK3XkP2RHYbQx93UQk',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
