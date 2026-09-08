@@ -42,6 +42,27 @@ export const EXTENSIONES_ARCHIVO_PERMITIDAS = [
   '.pptx',
 ] as const
 
+// Qué MIME(s) corresponde a cada extensión — se usa para exigir que
+// extensión y MIME coincidan entre sí, no solo que cada uno esté
+// permitido por separado (ver esTipoArchivoPermitido en
+// validaciones.ts).
+export const MIME_POR_EXTENSION: Record<
+  (typeof EXTENSIONES_ARCHIVO_PERMITIDAS)[number],
+  (typeof TIPOS_ARCHIVO_PERMITIDOS)[number][]
+> = {
+  '.pdf':  ['application/pdf'],
+  '.jpg':  ['image/jpeg'],
+  '.jpeg': ['image/jpeg'],
+  '.png':  ['image/png'],
+  '.webp': ['image/webp'],
+  '.doc':  ['application/msword'],
+  '.docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  '.xls':  ['application/vnd.ms-excel'],
+  '.xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+  '.ppt':  ['application/vnd.ms-powerpoint'],
+  '.pptx': ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+}
+
 export const ACCEPT_ARCHIVOS = EXTENSIONES_ARCHIVO_PERMITIDAS.join(',')
 
 export const MAX_TEMAS = 8
