@@ -1,7 +1,7 @@
 import {
   EXTENSIONES_ARCHIVO_PERMITIDAS,
   TIPOS_ARCHIVO_PERMITIDOS,
-} from '@/lib/constants'
+} from './constants'
 
 export const MAX_COMENTARIO_CHARS = 500
 
