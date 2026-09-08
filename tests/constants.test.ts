@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict'
-import test from 'node:test'
+import { describe, expect, it, test } from 'vitest'
 import {
   EXTENSIONES_ARCHIVO_PERMITIDAS,
   TIPOS_ARCHIVO_PERMITIDOS,
@@ -15,27 +14,24 @@ import {
 // este test lo va a atrapar en vez de dejar que se cuele en
 // producción.
 
-test('constants: toda extensión permitida tiene su mapeo de MIME', () => {
-  for (const ext of EXTENSIONES_ARCHIVO_PERMITIDAS) {
-    assert.ok(
-      ext in MIME_POR_EXTENSION,
-      `Falta MIME_POR_EXTENSION['${ext}']`
-    )
-  }
+describe('constants', () => {
+  test('toda extensión permitida tiene su mapeo de MIME', () => {
+    for (const ext of EXTENSIONES_ARCHIVO_PERMITIDAS) {
+      expect(ext in MIME_POR_EXTENSION).toBe(true)
+    }
+  })
 })
 
 test('constants: todo MIME referenciado en el mapeo está en la lista blanca', () => {
   for (const [ext, mimes] of Object.entries(MIME_POR_EXTENSION)) {
     for (const mime of mimes) {
-      assert.ok(
-        (TIPOS_ARCHIVO_PERMITIDOS as readonly string[]).includes(mime),
-        `MIME_POR_EXTENSION['${ext}'] referencia "${mime}", que no está en TIPOS_ARCHIVO_PERMITIDOS`
-      )
+      expect((TIPOS_ARCHIVO_PERMITIDOS as readonly string[]).includes(mime)).toBe(true)
+
     }
   }
 })
 
 test('constants: no hay extensiones duplicadas', () => {
   const unicas = new Set(EXTENSIONES_ARCHIVO_PERMITIDAS)
-  assert.equal(unicas.size, EXTENSIONES_ARCHIVO_PERMITIDAS.length)
+  expect(unicas.size).toBe(EXTENSIONES_ARCHIVO_PERMITIDAS.length)
 })
