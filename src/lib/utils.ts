@@ -6,7 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatSemestre(semestre: string): string {
-  const [year, period] = semestre.split('-')
+  const match = /^(\d{4})-(1|2)$/.exec(semestre)
+  if (!match) return semestre // dato corrupto: mejor devolverlo tal cual que inventar un periodo
+
+  const [, year, period] = match
   return `${period === '1' ? 'Primer' : 'Segundo'} semestre ${year}`
 }
 

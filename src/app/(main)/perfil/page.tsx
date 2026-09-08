@@ -1,12 +1,30 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { BookOpen, Download, FileUp, Star, ThumbsUp, UserRound } from 'lucide-react'
+import { BookOpen, FileUp, Star, ThumbsUp, UserRound } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { ExamenCard } from '@/components/parciales/ExamenCard'
 import type { ColorCarrera } from '@/lib/constants'
+
+// Supabase sin tipos generados (supabase gen types) devuelve las
+// relaciones anidadas como objeto o como array de un elemento según
+// el caso — de ahí el helper uno() de abajo, mismo criterio que ya
+// usaba este archivo para perfil?.carreras.
+type Carrera = { nombre: string; color: string }
+type Materia = { nombre: string; carreras: Carrera | Carrera[] | null }
+type Oferta = { materia_id: string; semestre: string; materias: Materia | Materia[] | null }
+type DocumentoFavorito = {
+  id: string; oferta_id: string; corte: string; fecha_subida: string
+  ofertas: Oferta | Oferta[] | null
+}
+type FavoritoRow = { documentos: DocumentoFavorito | DocumentoFavorito[] | null }
+
+function uno<T>(valor: T | T[] | null | undefined): T | null {
+  if (!valor) return null
+  return Array.isArray(valor) ? (valor[0] ?? null) : valor
+}
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -33,18 +51,18 @@ export default async function PerfilPage() {
     .order('created_at', { ascending: false })
     .limit(12)
 
-  const docs = (favoritosRows ?? []).map((row: any) => {
-    const d = row.documentos
-    const o = d?.ofertas
-    const m = o?.materias
-    const c = m?.carreras
+  const docs = (favoritosRows ?? []).map((row: FavoritoRow) => {
+    const d = uno(row.documentos)
+    const o = uno(d?.ofertas)
+    const m = uno(o?.materias)
+    const c = uno(m?.carreras)
     return d && o && m ? {
       id: d.id, materia: m.nombre, carrera: c?.nombre ?? 'Carrera',
       carreraColor: (c?.color ?? 'aula') as ColorCarrera, semestre: o.semestre,
       corte: d.corte, temas: null, votosCount: 0, yaVoto: false,
       comentariosCount: 0, loggedIn: true, esDueno: false,
     } : null
-  }).filter(Boolean) as any[]
+  }).filter((doc): doc is NonNullable<typeof doc> => doc !== null)
 
   const carrera = Array.isArray(perfil?.carreras) ? perfil?.carreras[0] : perfil?.carreras
 
