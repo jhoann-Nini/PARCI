@@ -24,7 +24,15 @@ export function formatCorte(corte: string): string {
 }
 
 export function formatFecha(fecha: string): string {
-  return new Date(fecha).toLocaleDateString('es-CO', {
+  // "2026-03-15" (sin hora, típico de una columna `date`) lo
+  // interpreta Date() como medianoche UTC, no local — en timezones
+  // detrás de UTC (todo el continente americano, incluida
+  // Colombia) eso muestra el día ANTERIOR. Si ya trae hora
+  // (timestamptz), se deja tal cual.
+  const tieneHora = /T\d{2}:\d{2}/.test(fecha)
+  const fechaLocal = tieneHora ? fecha : `${fecha}T00:00:00`
+
+  return new Date(fechaLocal).toLocaleDateString('es-CO', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
