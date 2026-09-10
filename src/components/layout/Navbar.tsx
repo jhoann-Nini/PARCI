@@ -9,17 +9,19 @@ export async function Navbar() {
   const { data: { user } } = await supabase.auth.getUser()
 
   let esModerador = false
+  let nombre = 'Usuario'
   if (user) {
-    const { data: perfil } = await supabase.from('perfiles').select('rol').eq('id', user.id).single()
+    const { data: perfil } = await supabase.from('perfiles').select('rol, nombre').eq('id', user.id).single()
     esModerador = perfil ? ['supervisor', 'administrador', 'admin'].includes(perfil.rol) : false
+    nombre = perfil?.nombre ?? user.user_metadata?.nombre ?? 'Usuario'
   }
+  const iniciales = nombre.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-linea bg-papel/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-linea bg-papel/95 backdrop-blur">
       <div className="mx-auto flex min-h-14 max-w-5xl items-center justify-between gap-3 px-4 py-2">
         <Link href="/" className="flex min-w-0 items-center gap-2">
           <Logo className="text-xl" />
-          <span className="hidden text-xs text-tinta-suave sm:inline">Univalle · Tuluá</span>
         </Link>
 
         <nav className="hidden items-center gap-5 text-sm text-tinta-suave sm:flex">
@@ -30,8 +32,12 @@ export async function Navbar() {
 
         <div className="hidden items-center gap-2 sm:flex">
           {user ? <>
-            <Link href="/subir"><Button variant="accent" size="sm">Subir parcial</Button></Link>
-            <form action={logout}><Button type="submit" variant="ghost" size="sm">Salir</Button></form>
+            <Link href="/subir"><Button variant="primary" size="sm">Subir parcial</Button></Link>
+            <Link href="/perfil" className="flex items-center gap-2 rounded-md border border-linea bg-papel px-2 py-1.5 text-xs text-tinta transition-colors hover:bg-white/50">
+              <span className="hidden sm:inline">{nombre}</span>
+              <span className="flex h-7 w-7 items-center justify-center rounded-sm bg-azul-aula font-serif font-bold text-papel">{iniciales || 'U'}</span>
+              <span className="text-tinta-suave">⌄</span>
+            </Link>
           </> : <>
             <Link href="/login"><Button variant="ghost" size="sm">Iniciar sesión</Button></Link>
             <Link href="/registro"><Button size="sm">Registrarse</Button></Link>
