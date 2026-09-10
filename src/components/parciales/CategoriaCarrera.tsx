@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { MiniExamenCard } from '@/components/parciales/MiniExamenCard'
@@ -29,11 +31,6 @@ interface CategoriaCarreraProps {
   documentos: DocumentoResumen[]
 }
 
-/**
- * Sección "Explora por carrera": pestaña de carpeta de color sólido
- * + fila horizontal de vistas previas. Solo se renderiza cuando la
- * carrera tiene al menos un documento activo (ver caller).
- */
 export function CategoriaCarrera({ carreraId, nombre, color, total, documentos }: CategoriaCarreraProps) {
   return (
     <section className="mb-8">
