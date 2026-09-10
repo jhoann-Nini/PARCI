@@ -1,8 +1,25 @@
 import { Search } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { EstadisticasInicio } from '@/components/parciales/EstadisticasInicio'
 
-export function HeroInicio() {
+export async function HeroInicio() {
+  const supabase = await createClient()
+
+  const [{ count: parciales }, { count: materias }, { count: carreras }] = await Promise.all([
+    supabase
+      .from('documentos')
+      .select('id', { count: 'exact', head: true })
+      .eq('estado', 'activo'),
+    supabase
+      .from('materias')
+      .select('id', { count: 'exact', head: true }),
+    supabase
+      .from('carreras')
+      .select('id', { count: 'exact', head: true }),
+  ])
+
   return (
     <section className="flex flex-col items-center px-2 pb-2 pt-10 text-center sm:pt-14">
       <p className="mb-4 font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-lapiz-rojo sm:text-xs">
@@ -43,6 +60,12 @@ export function HeroInicio() {
           Buscar parciales
         </Button>
       </form>
+
+      <EstadisticasInicio
+        parciales={parciales ?? 0}
+        materias={materias ?? 0}
+        carreras={carreras ?? 0}
+      />
     </section>
   )
 }
