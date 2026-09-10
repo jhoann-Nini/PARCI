@@ -58,7 +58,13 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
 
   const carrera = Array.isArray(perfil?.carreras) ? perfil.carreras[0] : perfil?.carreras
   const nombre = perfil?.nombre ?? user.user_metadata?.nombre ?? 'Estudiante'
-  const iniciales = nombre.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase()
+  const iniciales = nombre
+    .split(' ')
+    .filter((p: string) => Boolean(p))
+    .slice(0, 2)
+    .map((p: string) => p[0])
+    .join('')
+    .toUpperCase()
   const semestre = user.user_metadata?.semestre ?? '—'
   const miembroDesde = user.created_at
     ? new Intl.DateTimeFormat('es-CO', { month: 'short', year: 'numeric' }).format(new Date(user.created_at))
