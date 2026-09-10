@@ -48,7 +48,14 @@ export function CategoriaCarrera({ carreraId, nombre, color, total, documentos }
       </div>
 
       <div className="rounded-b-lg rounded-tr-lg border border-linea bg-white p-4 shadow-paper-sm">
-        <div className="flex snap-x snap-proximity gap-3 overflow-x-auto scroll-smooth pb-1">
+        <div
+          className="flex snap-x snap-proximity gap-3 overflow-x-auto overscroll-x-contain scroll-smooth pb-2 [scrollbar-width:thin]"
+          onWheel={(event) => {
+            if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+              event.currentTarget.scrollLeft += event.deltaY
+            }
+          }}
+        >
           {documentos.map((doc) => (
             <MiniExamenCard
               key={doc.id}
