@@ -6,7 +6,7 @@ export function HeroInicio() {
   return (
     <section className="flex flex-col items-center px-2 pb-2 pt-10 text-center sm:pt-14">
       <p className="mb-4 font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-lapiz-rojo sm:text-xs">
-        Universidad del Valle · Sede Tuluá
+        Para universitarios
       </p>
 
       <h1 className="max-w-3xl font-serif text-5xl font-bold leading-[0.98] tracking-tight text-tinta sm:text-6xl lg:text-7xl">
@@ -18,7 +18,7 @@ export function HeroInicio() {
       <p className="mt-6 max-w-xl text-sm leading-6 text-tinta-suave sm:text-base">
         Encuentra exámenes de semestres anteriores,
         <br className="hidden sm:block" />
-        organizados por materia y profe. Sin registro, sin rodeos.
+        organizados por materia. Sin registro, sin rodeos.
       </p>
 
       <form method="GET" action="/explorar" className="mt-8 w-full max-w-2xl">
@@ -29,7 +29,7 @@ export function HeroInicio() {
           />
           <Input
             name="q"
-            placeholder="Busca por materia, profe o carrera..."
+            placeholder="Busca por materia o carrera..."
             aria-label="Buscar parciales"
             className="h-12 w-full rounded-md bg-white pl-12 pr-4 text-sm shadow-paper-sm sm:h-13"
           />
