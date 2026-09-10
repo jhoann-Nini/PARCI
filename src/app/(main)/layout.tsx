@@ -8,7 +8,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
       <footer className="border-t py-6 text-center text-xs text-tinta-suave">
-        Parci · Universidad del Valle, sede Tuluá
+        Parci · Para universitarios
       </footer>
     </>
   )
