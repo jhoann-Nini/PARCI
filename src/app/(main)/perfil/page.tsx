@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { ExamenCard } from '@/components/parciales/ExamenCard'
+import { MiParcialItem } from '@/components/parciales/MiParcialItem'
 import type { ColorCarrera } from '@/lib/constants'
 
 type Carrera = { nombre: string; color: string }
@@ -14,6 +15,16 @@ type Materia = { nombre: string; carreras: Carrera | Carrera[] | null }
 type Oferta = { materia_id: string; semestre: string; materias: Materia | Materia[] | null }
 type DocumentoFavorito = { id: string; oferta_id: string; corte: string; fecha_subida: string; ofertas: Oferta | Oferta[] | null }
 type FavoritoRow = { documentos: DocumentoFavorito | DocumentoFavorito[] | null }
+
+// "Mis documentos" sí necesita el id de la carrera (para el link
+// "Ver" de MiParcialItem, que filtra /explorar por carrera+materia)
+type CarreraConId = { id: string; nombre: string; color: string }
+type MateriaConCarreraId = { nombre: string; carreras: CarreraConId | CarreraConId[] | null }
+type OfertaConMateriaId = { materia_id: string; semestre: string; materias: MateriaConCarreraId | MateriaConCarreraId[] | null }
+type MiDocumentoRow = {
+  id: string; corte: string; fecha_subida: string; estado: string
+  ofertas: OfertaConMateriaId | OfertaConMateriaId[] | null
+}
 
 function uno<T>(valor: T | T[] | null | undefined): T | null {
   if (!valor) return null
@@ -34,10 +45,29 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
     .eq('id', user.id)
     .single()
 
-  const [{ count: subidos }, { count: favoritos }] = await Promise.all([
-    supabase.from('documentos').select('id', { count: 'exact', head: true }).eq('subido_por', user.id),
-    supabase.from('favoritos').select('documento_id', { count: 'exact', head: true }).eq('usuario_id', user.id),
-  ])
+  const { count: favoritos } = await supabase
+    .from('favoritos')
+    .select('documento_id', { count: 'exact', head: true })
+    .eq('usuario_id', user.id)
+
+  const { data: misDocIdsRows } = await supabase
+    .from('documentos')
+    .select('id')
+    .eq('subido_por', user.id)
+  const misDocIds = (misDocIdsRows ?? []).map((r) => r.id)
+  const subidos = misDocIds.length
+
+  const descargasPorDoc = new Map<string, number>()
+  if (misDocIds.length > 0) {
+    const { data: descargasRows } = await supabase
+      .from('descargas')
+      .select('documento_id')
+      .in('documento_id', misDocIds)
+    for (const row of descargasRows ?? []) {
+      descargasPorDoc.set(row.documento_id, (descargasPorDoc.get(row.documento_id) ?? 0) + 1)
+    }
+  }
+  const totalDescargas = [...descargasPorDoc.values()].reduce((a, b) => a + b, 0)
 
   const { data: favoritosRows } = await supabase
     .from('favoritos')
@@ -45,6 +75,47 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
     .eq('usuario_id', user.id)
     .order('created_at', { ascending: false })
     .limit(12)
+
+  let misDocumentos: {
+    id: string; carreraId: string; materiaId: string; materia: string
+    carreraColor: ColorCarrera; semestre: string; corte: string
+    fechaSubida: string; estado: string; descargas: number
+  }[] = []
+
+  if (pestaña === 'mis-parciales') {
+    const { data: misDocumentosRows } = await supabase
+      .from('documentos')
+      .select(`
+        id, corte, fecha_subida, estado,
+        ofertas ( materia_id, semestre, materias ( nombre, carreras ( id, nombre, color ) ) )
+      `)
+      .eq('subido_por', user.id)
+      .order('fecha_subida', { ascending: false })
+
+    const filas = (misDocumentosRows ?? []) as unknown as MiDocumentoRow[]
+
+    misDocumentos = filas
+      .map((f) => {
+        const o = uno(f.ofertas)
+        const m = uno(o?.materias)
+        const c = uno(m?.carreras)
+        return o && m && c
+          ? {
+              id: f.id,
+              carreraId: c.id,
+              materiaId: o.materia_id,
+              materia: m.nombre,
+              carreraColor: (c.color ?? 'aula') as ColorCarrera,
+              semestre: o.semestre,
+              corte: f.corte,
+              fechaSubida: f.fecha_subida,
+              estado: f.estado,
+              descargas: descargasPorDoc.get(f.id) ?? 0,
+            }
+          : null
+      })
+      .filter((d): d is NonNullable<typeof d> => d !== null)
+  }
 
   const docs = (favoritosRows ?? []).map((row: FavoritoRow) => {
     const d = uno(row.documentos)
@@ -95,7 +166,7 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
 
           <div className="mt-6 grid grid-cols-3 border-t border-white/15">
             <ProfileStat value={subidos ?? 0} label="Subidos" />
-            <ProfileStat value={0} label="Descargas" />
+            <ProfileStat value={totalDescargas} label="Descargas" />
             <ProfileStat value={favoritos ?? 0} label="Guardados" />
           </div>
         </div>
@@ -125,7 +196,11 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
                 ? <Empty text="Todavía no tienes parciales guardados." />
                 : <div className="grid gap-4 sm:grid-cols-2">{docs.map((doc) => <ExamenCard key={doc.id} {...doc} />)}</div>
             ) : (
-              <Empty text="Tus parciales subidos aparecerán aquí." action="Subir mi parcial" />
+              misDocumentos.length === 0
+                ? <Empty text="Tus parciales subidos aparecerán aquí." action="Subir mi parcial" />
+                : <div className="grid gap-3 sm:grid-cols-2">
+                    {misDocumentos.map((doc) => <MiParcialItem key={doc.id} {...doc} />)}
+                  </div>
             )}
           </section>
         )}

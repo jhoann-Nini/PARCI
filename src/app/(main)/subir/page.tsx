@@ -18,7 +18,7 @@ export default async function SubirPage() {
   return (
     <div className="mx-auto max-w-xl flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h1 className="font-mono text-2xl font-bold text-tinta">Subir parcial</h1>
+        <h1 className="font-serif text-2xl font-bold text-tinta">Subir parcial</h1>
         <p className="text-sm text-tinta-suave">
           Ayuda a los próximos estudiantes compartiendo un examen anterior.
         </p>
@@ -28,3 +28,4 @@ export default async function SubirPage() {
     </div>
   )
 }
+
