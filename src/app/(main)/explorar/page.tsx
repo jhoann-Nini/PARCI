@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { ExamenCard } from '@/components/parciales/ExamenCard'
-import { CardDestacada } from '@/components/parciales/CardDestacada'
 import { CategoriaCarrera } from '@/components/parciales/CategoriaCarrera'
+import { RecienSubidoCard } from '@/components/parciales/RecienSubidoCard'
 import { RevelarAlEntrar } from '@/components/parciales/RevelarAlEntrar'
 import { HeroInicio } from '@/components/parciales/HeroInicio'
 import { Input } from '@/components/ui/Input'
@@ -27,7 +27,7 @@ interface DocumentoRPC {
   votos_count: number; comentarios_count: number; ya_voto: boolean; subido_por: string | null
 }
 
-const CANTIDAD_DESTACADOS = 3
+const CANTIDAD_DESTACADOS = 6
 const CANTIDAD_POR_CARRERA = 6
 
 export default async function ExplorarPage({
@@ -251,41 +251,40 @@ async function PaginaInicio({
   }
 
   return (
-    <div className="flex flex-col gap-10 pb-10 pt-10">
+    <div className="flex flex-col pb-10">
+      <div className="-mx-4 px-4 pb-2 pt-2 sm:pt-4">
+        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <span
+              key={i}
+              aria-hidden="true"
+              className="h-9 w-28 shrink-0 rounded-md border border-linea bg-white shadow-paper-sm sm:w-32"
+            />
+          ))}
+        </div>
+      </div>
+
       {destacadosDocs.length > 0 && (
-        <section>
+        <section className="pt-8">
           <div className="mb-4 flex items-baseline justify-between">
-            <div>
-              <h2 className="flex items-center gap-2 font-mono text-lg font-bold text-tinta">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-lapiz-rojo" />
-                Recién subidos
-              </h2>
-              <p className="mt-1 text-xs text-tinta-suave">Lo último que subieron tus compañeros.</p>
-            </div>
-            <Link href="/explorar?orden=recientes" className="text-xs text-lapiz-rojo hover:underline">
+            <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-lapiz-rojo">
+              Recién subidos
+            </h2>
+            <Link href="/explorar?orden=recientes" className="text-xs text-tinta-suave hover:text-tinta hover:underline">
               Ver todos →
             </Link>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             {destacadosDocs.map((doc, i) => (
-              <RevelarAlEntrar key={doc.id} retrasoMs={i * 80}>
-                <CardDestacada fechaSubida={doc.fecha_subida} index={i as 0 | 1 | 2}>
-                  <ExamenCard
-                    id={doc.id}
-                    materia={doc.materia_nombre}
-                    carrera={doc.carrera_nombre}
-                    carreraColor={doc.carrera_color as ColorCarrera}
-                    semestre={doc.semestre}
-                    corte={doc.corte}
-                    temas={doc.temas}
-                    votosCount={doc.votos_count}
-                    yaVoto={doc.ya_voto}
-                    comentariosCount={doc.comentarios_count}
-                    loggedIn={loggedIn}
-                    esDueno={!!userId && doc.subido_por === userId}
-                  />
-                </CardDestacada>
+              <RevelarAlEntrar key={doc.id} retrasoMs={i * 60}>
+                <RecienSubidoCard
+                  id={doc.id}
+                  materia={doc.materia_nombre}
+                  semestre={doc.semestre}
+                  corte={doc.corte}
+                  color={doc.carrera_color as ColorCarrera}
+                />
               </RevelarAlEntrar>
             ))}
           </div>
@@ -293,7 +292,7 @@ async function PaginaInicio({
       )}
 
       {carrerasConDocumentos.length > 0 && (
-        <section>
+        <section className="mt-10">
           <div className="mb-5 flex items-center gap-3">
             <span className="shrink-0 font-mono text-xs text-tinta-suave">Explora por carrera</span>
             <div className="h-px flex-1 bg-linea" />
