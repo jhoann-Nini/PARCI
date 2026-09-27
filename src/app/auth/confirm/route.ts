@@ -2,24 +2,41 @@ import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// Enlace al que apunta el correo de confirmación de Supabase.
-// Sin esta ruta, el link de "confirma tu cuenta" no tiene dónde
-// completar la verificación y el usuario nunca queda autenticado.
+// Completa la confirmación de Supabase tanto con el flujo PKCE (code)
+// como con el flujo directo por token_hash.
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
-  const token_hash = searchParams.get('token_hash')
+  const code = searchParams.get('code')
+  const tokenHash = searchParams.get('token_hash')
   const type = searchParams.get('type') as EmailOtpType | null
-  const next = searchParams.get('next') ?? '/explorar'
+  const requestedNext = searchParams.get('next') ?? '/explorar'
+  const next =
+    requestedNext.startsWith('/') && !requestedNext.startsWith('//')
+      ? requestedNext
+      : '/explorar'
 
-  if (token_hash && type) {
-    const supabase = await createClient()
+  const supabase = await createClient()
 
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash })
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
+      return NextResponse.redirect(new URL(next, origin))
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=confirmacion`)
+  if (tokenHash && type) {
+    const { error } = await supabase.auth.verifyOtp({
+      type,
+      token_hash: tokenHash,
+    })
+
+    if (!error) {
+      return NextResponse.redirect(new URL(next, origin))
+    }
+  }
+
+  return NextResponse.redirect(
+    new URL('/login?error=confirmacion', origin)
+  )
 }
