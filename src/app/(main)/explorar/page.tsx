@@ -6,7 +6,7 @@ import { CardDestacada } from '@/components/parciales/CardDestacada'
 import { CategoriaCarrera } from '@/components/parciales/CategoriaCarrera'
 import { RevelarAlEntrar } from '@/components/parciales/RevelarAlEntrar'
 import { HeroInicio } from '@/components/parciales/HeroInicio'
-import { Input } from '@/components/ui/Input'
+import { FiltrosExplorar } from '@/components/explorar/FiltrosExplorar'
 import { Button } from '@/components/ui/Button'
 import type { ColorCarrera } from '@/lib/constants'
 import type { OrdenDocumentos } from '@/types'
@@ -27,6 +27,18 @@ interface DocumentoRPC {
   votos_count: number; comentarios_count: number; ya_voto: boolean; subido_por: string | null
 }
 
+interface Carrera {
+  id: string
+  nombre: string
+  color: string
+}
+
+interface Materia {
+  id: string
+  nombre: string
+  carrera_id: string
+}
+
 const CANTIDAD_DESTACADOS = 3
 const CANTIDAD_POR_CARRERA = 6
 
@@ -39,7 +51,13 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
   const orden: OrdenDocumentos = params.orden === 'utiles' ? 'utiles' : 'recientes'
   const hayFiltros = !!(params.q || params.carrera_id || params.materia_id || params.semestre || params.corte || orden === 'utiles')
 
-  const { data: carreras } = await supabase.from('carreras').select('id, nombre, color').order('nombre')
+  const [{ data: carreras }, { data: materias }, { data: ofertas }] = await Promise.all([
+    supabase.from('carreras').select('id, nombre, color').order('nombre'),
+    supabase.from('materias').select('id, nombre, carrera_id').order('nombre'),
+    supabase.from('ofertas').select('semestre').not('semestre', 'is', null).order('semestre'),
+  ])
+
+  const semestres = [...new Set((ofertas ?? []).map((oferta) => oferta.semestre).filter(Boolean))]
 
   return (
     <div className="flex flex-col">
@@ -50,17 +68,14 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
             <p className="font-mono text-xs uppercase tracking-widest text-lapiz-rojo">Explorar parciales</p>
             <h1 className="mt-1 font-mono text-2xl font-bold text-tinta">Busca el parcial que necesitas.</h1>
           </div>
-          <form method="GET" action="/explorar" className="flex flex-col gap-3 sm:flex-row">
-            <Input name="q" defaultValue={params.q} placeholder="Busca por materia, carrera o tema…" className="flex-1" />
-            <select name="carrera_id" defaultValue={params.carrera_id ?? ''} className="h-10 rounded-md border border-linea bg-papel px-3 font-mono text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"><option value="">Todas las carreras</option>{carreras?.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}</select>
-            <select name="corte" defaultValue={params.corte ?? ''} className="h-10 rounded-md border border-linea bg-papel px-3 font-mono text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"><option value="">Todos los cortes</option><option value="quiz">Quiz</option><option value="parcial_1">Parcial 1</option><option value="parcial_2">Parcial 2</option><option value="final">Final</option></select>
-            <select name="orden" defaultValue={orden} className="h-10 rounded-md border border-linea bg-papel px-3 font-mono text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"><option value="recientes">Más recientes</option><option value="utiles">Más útiles</option></select>
-            <Button type="submit">Buscar</Button>
-          </form>
-          <a href="/explorar" className="w-fit text-xs text-tinta-suave underline hover:text-lapiz-rojo">Limpiar filtros</a>
+          <FiltrosExplorar
+            carreras={(carreras ?? []).map(({ id, nombre }) => ({ id, nombre }))}
+            materias={(materias ?? []) as Materia[]}
+            semestres={semestres}
+          />
         </section>
       )}
-      {hayFiltros ? <ResultadosBusqueda params={params} orden={orden} anonId={anonId} loggedIn={!!user} userId={user?.id ?? null} /> : <PaginaInicio carreras={carreras ?? []} anonId={anonId} loggedIn={!!user} userId={user?.id ?? null} />}
+      {hayFiltros ? <ResultadosBusqueda params={params} orden={orden} anonId={anonId} loggedIn={!!user} userId={user?.id ?? null} /> : <PaginaInicio carreras={(carreras ?? []) as Carrera[]} anonId={anonId} loggedIn={!!user} userId={user?.id ?? null} />}
     </div>
   )
 }
@@ -73,7 +88,7 @@ async function ResultadosBusqueda({ params, orden, anonId, loggedIn, userId }: {
   return <section className="pb-10 pt-6"><p className="mb-4 text-xs text-tinta-suave">{docs.length} parcial{docs.length !== 1 ? 'es' : ''} encontrado{docs.length !== 1 ? 's' : ''}</p><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{docs.map((doc) => <ExamenCard key={doc.id} id={doc.id} materia={doc.materia_nombre} carrera={doc.carrera_nombre} carreraColor={doc.carrera_color as ColorCarrera} semestre={doc.semestre} corte={doc.corte} temas={doc.temas} votosCount={doc.votos_count} yaVoto={doc.ya_voto} comentariosCount={doc.comentarios_count} loggedIn={loggedIn} esDueno={!!userId && doc.subido_por === userId} />)}</div></section>
 }
 
-async function PaginaInicio({ carreras, anonId, loggedIn, userId }: { carreras: { id: string; nombre: string; color: string }[]; anonId: string | null; loggedIn: boolean; userId: string | null }) {
+async function PaginaInicio({ carreras, anonId, loggedIn, userId }: { carreras: Carrera[]; anonId: string | null; loggedIn: boolean; userId: string | null }) {
   const supabase = await createClient()
   const { data: destacados } = await supabase.rpc('buscar_documentos', { p_orden: 'recientes', p_anon_id: anonId, p_limit: CANTIDAD_DESTACADOS, p_offset: 0 })
   const porCarrera = await Promise.all(carreras.map(async (carrera) => {
