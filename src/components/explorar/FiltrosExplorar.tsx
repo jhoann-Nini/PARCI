@@ -20,6 +20,7 @@ interface FiltrosExplorarProps {
   carreras: Carrera[]
   materias: Materia[]
   semestres: string[]
+  mostrarBusqueda?: boolean
 }
 
 const SELECT_CLASS =
@@ -36,6 +37,7 @@ export function FiltrosExplorar({
   carreras,
   materias,
   semestres,
+  mostrarBusqueda = true,
 }: FiltrosExplorarProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -101,22 +103,24 @@ export function FiltrosExplorar({
 
   return (
     <form method="GET" action="/explorar" className="flex flex-col gap-3">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-        <div className="min-w-0 flex-1">
-          <label htmlFor="explorar-q" className="mb-1.5 block text-xs font-medium text-tinta">
+      {mostrarBusqueda && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+          <div className="min-w-0 flex-1">
+            <label htmlFor="explorar-q" className="mb-1.5 block text-xs font-medium text-tinta">
+              Buscar parciales
+            </label>
+            <Input
+              id="explorar-q"
+              name="q"
+              defaultValue={searchParams.get('q') ?? ''}
+              placeholder="Materia, carrera o tema…"
+            />
+          </div>
+          <Button type="submit" className="sm:shrink-0">
             Buscar parciales
-          </label>
-          <Input
-            id="explorar-q"
-            name="q"
-            defaultValue={searchParams.get('q') ?? ''}
-            placeholder="Materia, carrera o tema…"
-          />
+          </Button>
         </div>
-        <Button type="submit" className="sm:shrink-0">
-          Buscar parciales
-        </Button>
-      </div>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-linea pt-3">
         <button
