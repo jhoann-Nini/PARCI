@@ -59,22 +59,27 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
 
   const semestres = [...new Set((ofertas ?? []).map((oferta) => oferta.semestre).filter(Boolean))]
 
+  const filtros = (
+    <FiltrosExplorar
+      carreras={(carreras ?? []).map(({ id, nombre }) => ({ id, nombre }))}
+      materias={(materias ?? []) as Materia[]}
+      semestres={semestres}
+      mostrarBusqueda={hayFiltros}
+    />
+  )
+
   return (
     <div className="flex flex-col">
       {!hayFiltros && <HeroInicio />}
-      {hayFiltros && (
-        <section className="flex flex-col gap-4 pb-2 pt-4">
+      <section className="flex flex-col gap-4 pb-2 pt-4">
+        {hayFiltros && (
           <div>
             <p className="font-mono text-xs uppercase tracking-widest text-lapiz-rojo">Explorar parciales</p>
             <h1 className="mt-1 font-mono text-2xl font-bold text-tinta">Busca el parcial que necesitas.</h1>
           </div>
-          <FiltrosExplorar
-            carreras={(carreras ?? []).map(({ id, nombre }) => ({ id, nombre }))}
-            materias={(materias ?? []) as Materia[]}
-            semestres={semestres}
-          />
-        </section>
-      )}
+        )}
+        {filtros}
+      </section>
       {hayFiltros ? <ResultadosBusqueda params={params} orden={orden} anonId={anonId} loggedIn={!!user} userId={user?.id ?? null} /> : <PaginaInicio carreras={(carreras ?? []) as Carrera[]} anonId={anonId} loggedIn={!!user} userId={user?.id ?? null} />}
     </div>
   )
