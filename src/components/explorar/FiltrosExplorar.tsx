@@ -25,6 +25,13 @@ interface FiltrosExplorarProps {
 const SELECT_CLASS =
   'h-10 w-full rounded-md border border-linea bg-papel px-3 font-mono text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo'
 
+const ETIQUETAS_CORTE: Record<string, string> = {
+  quiz: 'Quiz',
+  parcial_1: 'Parcial 1',
+  parcial_2: 'Parcial 2',
+  final: 'Final',
+}
+
 export function FiltrosExplorar({
   carreras,
   materias,
@@ -142,7 +149,7 @@ export function FiltrosExplorar({
         >
           <div className="mb-4">
             <p className="font-mono text-xs font-bold uppercase tracking-wider text-tinta">
-              Filtra tus resultados
+              Filtra los resultados
             </p>
             <p className="mt-1 text-xs text-tinta-suave">
               Combina carrera, materia, semestre y corte para encontrar el parcial que necesitas.
@@ -289,9 +296,9 @@ export function FiltrosExplorar({
               type="button"
               onClick={() => quitarFiltro('corte')}
               className="inline-flex items-center gap-1 rounded-full border border-linea bg-papel px-2.5 py-1 text-xs text-tinta hover:border-lapiz-rojo"
-              aria-label={`Quitar filtro de corte ${corteSeleccionado}`}
+              aria-label={`Quitar filtro de corte ${ETIQUETAS_CORTE[corteSeleccionado] ?? corteSeleccionado}`}
             >
-              {corteSeleccionado}
+              {ETIQUETAS_CORTE[corteSeleccionado] ?? corteSeleccionado}
               <span aria-hidden="true">×</span>
             </button>
           )}
