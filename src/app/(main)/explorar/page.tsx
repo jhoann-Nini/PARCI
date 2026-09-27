@@ -104,8 +104,8 @@ async function PaginaInicio({ carreras, anonId, loggedIn, userId }: { carreras: 
     return { carrera, documentos: (documentos ?? []) as DocumentoRPC[], total: (total as number) ?? 0 }
   }))
   const destacadosDocs = (destacados ?? []) as DocumentoRPC[]
-  const carrerasConDocumentos = porCarrera.filter((c) => c.total > 0)
-  if (destacadosDocs.length === 0 && carrerasConDocumentos.length === 0) return <div className="flex flex-col items-center gap-3 py-16 text-center"><span className="font-mono text-4xl text-linea">?</span><p className="text-tinta-suave">Aún no hay parciales. ¡Sé el primero en subir uno!</p><Link href="/subir" className="mt-2"><Button variant="accent" size="sm">Subir un parcial</Button></Link></div>
+  const carrerasVisibles = porCarrera
+  if (destacadosDocs.length === 0 && carrerasVisibles.length === 0) return <div className="flex flex-col items-center gap-3 py-16 text-center"><span className="font-mono text-4xl text-linea">?</span><p className="text-tinta-suave">Aún no hay parciales. ¡Sé el primero en subir uno!</p><Link href="/subir" className="mt-2"><Button variant="accent" size="sm">Subir un parcial</Button></Link></div>
   return (
     <div className="flex flex-col gap-10 pb-10 pt-10">
       {destacadosDocs.length > 0 && (
@@ -128,10 +128,10 @@ async function PaginaInicio({ carreras, anonId, loggedIn, userId }: { carreras: 
           </div>
         </section>
       )}
-      {carrerasConDocumentos.length > 0 && (
+      {carrerasVisibles.length > 0 && (
         <section>
           <div className="mb-5 flex items-center gap-3"><span className="shrink-0 font-mono text-xs text-tinta-suave">Explora por carrera</span><div className="h-px flex-1 bg-linea" /><div className="flex gap-1.5"><span className="h-2 w-2 rounded-full border border-linea" /><span className="h-2 w-2 rounded-full border border-linea" /><span className="h-2 w-2 rounded-full border border-linea" /></div></div>
-          {carrerasConDocumentos.map(({ carrera, documentos, total }, i) => (
+          {carrerasVisibles.map(({ carrera, documentos, total }, i) => (
             <RevelarAlEntrar key={carrera.id} retrasoMs={Math.min(i * 90, 270)}>
               <CategoriaCarrera carreraId={carrera.id} nombre={carrera.nombre} color={carrera.color as ColorCarrera} total={total} documentos={documentos.map((d) => ({ id: d.id, materia_id: d.materia_id, materia_nombre: d.materia_nombre, corte: d.corte, semestre: d.semestre, fecha_subida: d.fecha_subida, votos_count: d.votos_count }))} />
             </RevelarAlEntrar>
