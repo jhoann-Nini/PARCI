@@ -137,7 +137,16 @@ async function PaginaInicio({ carreras, anonId, loggedIn, userId }: { carreras: 
       )}
       {carrerasVisibles.length > 0 && (
         <section>
-          <div className="mb-5 flex items-center gap-3"><span className="shrink-0 font-mono text-xs text-tinta-suave">Explora por carrera</span><div className="h-px flex-1 bg-linea" /><div className="flex gap-1.5"><span className="h-2 w-2 rounded-full border border-linea" /><span className="h-2 w-2 rounded-full border border-linea" /><span className="h-2 w-2 rounded-full border border-linea" /></div></div>
+          <div className="mb-5 flex items-center gap-3">
+            <span className="shrink-0 font-mono text-xs text-tinta-suave">Explora por carrera</span>
+            <div className="h-px flex-1 bg-linea" />
+            <Link
+              href="/carreras"
+              className="shrink-0 text-xs font-semibold text-lapiz-rojo hover:underline"
+            >
+              Ver todas las carreras →
+            </Link>
+          </div>
           {carrerasVisibles.map(({ carrera, documentos, total }, i) => (
             <RevelarAlEntrar key={carrera.id} retrasoMs={Math.min(i * 90, 270)}>
               <CategoriaCarrera carreraId={carrera.id} nombre={carrera.nombre} color={carrera.color as ColorCarrera} total={total} documentos={documentos.map((d) => ({ id: d.id, materia_id: d.materia_id, materia_nombre: d.materia_nombre, corte: d.corte, semestre: d.semestre, fecha_subida: d.fecha_subida, votos_count: d.votos_count }))} />
