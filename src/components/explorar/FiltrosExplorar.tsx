@@ -128,11 +128,45 @@ export function FiltrosExplorar({
           onClick={() => setFiltrosAbiertos((abiertos) => !abiertos)}
           aria-expanded={filtrosAbiertos}
           aria-controls="panel-filtros-explorar"
-          className="inline-flex h-9 items-center gap-2 rounded-md border border-linea bg-papel px-3 text-xs font-medium text-tinta transition-colors hover:border-tinta-suave"
+          className={`inline-flex h-10 items-center gap-2 rounded-md border px-3 text-xs font-semibold transition-colors focus:outline-2 focus:outline-lapiz-rojo ${
+            filtrosActivos > 0
+              ? 'border-lapiz-rojo bg-papel text-tinta shadow-paper-sm'
+              : 'border-linea bg-papel text-tinta hover:border-tinta-suave'
+          }`}
         >
-          <span aria-hidden="true">⚙</span>
-          Filtros{filtrosActivos > 0 ? ` (${filtrosActivos})` : ''}
-          <span aria-hidden="true">{filtrosAbiertos ? '↑' : '↓'}</span>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 20 20"
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+          >
+            <path strokeLinecap="round" d="M3 5h14M6 10h8M8.5 15h3" />
+          </svg>
+          <span>Filtrar resultados</span>
+          {filtrosActivos > 0 && (
+            <span
+              aria-label={`${filtrosActivos} filtros activos`}
+              className="inline-flex min-w-5 items-center justify-center rounded-full bg-lapiz-rojo px-1.5 py-0.5 text-[11px] font-bold text-papel"
+            >
+              {filtrosActivos}
+            </span>
+          )}
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 20 20"
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d={filtrosAbiertos ? 'm6 12 4-4 4 4' : 'm6 8 4 4 4-4'}
+            />
+          </svg>
         </button>
 
         {filtrosActivos > 0 && (
