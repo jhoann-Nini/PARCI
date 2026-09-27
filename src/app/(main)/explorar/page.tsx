@@ -105,6 +105,13 @@ async function PaginaInicio({ carreras, anonId, loggedIn, userId }: { carreras: 
   }))
   const destacadosDocs = (destacados ?? []) as DocumentoRPC[]
   const carrerasVisibles = porCarrera
+    .filter((c) => c.total > 0)
+    .sort((a, b) => {
+      const ultimaA = a.documentos[0]?.fecha_subida ?? ''
+      const ultimaB = b.documentos[0]?.fecha_subida ?? ''
+      return new Date(ultimaB).getTime() - new Date(ultimaA).getTime()
+    })
+    .slice(0, 3)
   if (destacadosDocs.length === 0 && carrerasVisibles.length === 0) return <div className="flex flex-col items-center gap-3 py-16 text-center"><span className="font-mono text-4xl text-linea">?</span><p className="text-tinta-suave">Aún no hay parciales. ¡Sé el primero en subir uno!</p><Link href="/subir" className="mt-2"><Button variant="accent" size="sm">Subir un parcial</Button></Link></div>
   return (
     <div className="flex flex-col gap-10 pb-10 pt-10">
