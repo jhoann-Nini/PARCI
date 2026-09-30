@@ -1,13 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageSquare, ChevronDown, ChevronUp, Trash2, AlertTriangle } from 'lucide-react'
+import {
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+  Trash2,
+  AlertTriangle,
+} from 'lucide-react'
+
 import { ReportarButton } from '@/components/parciales/ReportarButton'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
+
 import { formatFecha, cn } from '@/lib/utils'
 import { getAnonId } from '@/lib/anonId'
+
 import type { Comentario } from '@/types'
+
 
 interface ComentariosPanelProps {
   documentoId: string
@@ -16,198 +26,758 @@ interface ComentariosPanelProps {
   className?: string
 }
 
-export function ComentariosPanel({ documentoId, comentariosCountInicial, loggedIn, className }: ComentariosPanelProps) {
+
+export function ComentariosPanel({
+  documentoId,
+  comentariosCountInicial,
+  loggedIn,
+  className,
+}: ComentariosPanelProps) {
+
   const [abierto, setAbierto] = useState(false)
+
   const [cargado, setCargado] = useState(false)
   const [cargando, setCargando] = useState(false)
+
   const [comentarios, setComentarios] = useState<Comentario[]>([])
+
   const [count, setCount] = useState(comentariosCountInicial)
+
   const [texto, setTexto] = useState('')
+
   const [enviando, setEnviando] = useState(false)
+
   const [eliminando, setEliminando] = useState<string | null>(null)
-  const [comentarioAEliminar, setComentarioAEliminar] = useState<string | null>(null)
+
+  const [comentarioAEliminar, setComentarioAEliminar] =
+    useState<string | null>(null)
+
   const [error, setError] = useState('')
 
-  const propio = comentarios.find((c) => c.es_propio)
+  const [editando, setEditando] = useState(false)
+
+
+  const propio = comentarios.find(
+    (comentario) => comentario.es_propio
+  )
+
 
   async function toggle() {
-    const next = !abierto
-    setAbierto(next)
-    if (next && !cargado) await cargar()
+
+    const siguiente = !abierto
+
+    setAbierto(siguiente)
+
+    if (siguiente && !cargado) {
+      await cargar()
+    }
   }
+
 
   async function cargar() {
-    setCargando(true)
-    try {
-      const anonId = loggedIn ? '' : getAnonId()
-      const qs = new URLSearchParams({ documento_id: documentoId })
-      if (anonId) qs.set('anon_id', anonId)
-      const res = await fetch(`/api/comentarios?${qs.toString()}`)
-      if (!res.ok) return
-      const data = (await res.json()) as Comentario[]
-      setComentarios(data)
-      setCount(data.length)
-      setCargado(true)
-      const mio = data.find((c) => c.es_propio)
-      if (mio) setTexto(mio.contenido)
-    } finally {
-      setCargando(false)
-    }
-  }
 
-  async function enviar(e: React.FormEvent) {
-    e.preventDefault()
-    if (!texto.trim() || enviando) return
-    setEnviando(true)
-    setError('')
+    setCargando(true)
+
     try {
-      const res = await fetch('/api/comentarios', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          documento_id: documentoId,
-          contenido: texto.trim(),
-          anon_id: loggedIn ? undefined : getAnonId(),
-        }),
+
+      const anonId = loggedIn
+        ? ''
+        : getAnonId()
+
+
+      const params = new URLSearchParams({
+        documento_id: documentoId,
       })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? 'Ocurrió un error')
+
+
+      if (anonId) {
+        params.set('anon_id', anonId)
+      }
+
+
+      const respuesta = await fetch(
+        `/api/comentarios?${params.toString()}`
+      )
+
+
+      if (!respuesta.ok) {
         return
       }
-      setComentarios((prev) =>
-        [...prev.filter((c) => !c.es_propio), { ...data, es_propio: true } as Comentario].sort((a, b) =>
-          a.created_at.localeCompare(b.created_at)
-        )
+
+
+      const datos = await respuesta.json() as Comentario[]
+
+
+      setComentarios(datos)
+
+      setCount(datos.length)
+
+      setCargado(true)
+
+
+      const comentarioPropio = datos.find(
+        (comentario) => comentario.es_propio
       )
-      setCount((prev) => (propio ? prev : prev + 1))
-    } catch {
-      setError('Ocurrió un error inesperado')
+
+
+      if (comentarioPropio) {
+
+        setTexto(
+          comentarioPropio.contenido
+        )
+
+      }
+
+
     } finally {
-      setEnviando(false)
+
+      setCargando(false)
+
     }
+
   }
+
+
+
+  async function enviar(
+    e: React.FormEvent
+  ) {
+
+    e.preventDefault()
+
+
+    if (!texto.trim() || enviando) {
+      return
+    }
+
+
+    setEnviando(true)
+
+    setError('')
+
+
+    try {
+
+
+      const respuesta = await fetch(
+        '/api/comentarios',
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type': 'application/json',
+          },
+
+          body: JSON.stringify({
+            documento_id: documentoId,
+
+            contenido: texto.trim(),
+
+            anon_id: loggedIn
+              ? undefined
+              : getAnonId(),
+          }),
+        }
+      )
+
+
+      const datos = await respuesta.json()
+
+
+      if (!respuesta.ok) {
+
+        setError(
+          datos.error ?? 'No se pudo guardar el comentario'
+        )
+
+        return
+
+      }
+
+
+
+      setComentarios((previos) => [
+
+        ...previos.filter(
+          (comentario) => !comentario.es_propio
+        ),
+
+        {
+          ...datos,
+          es_propio: true,
+        } as Comentario,
+
+      ])
+
+
+
+      if (!propio) {
+
+        setCount(
+          (actual) => actual + 1
+        )
+
+      }
+
+
+      setEditando(false)
+
+
+    } catch {
+
+      setError(
+        'Ocurrió un error inesperado'
+      )
+
+
+    } finally {
+
+      setEnviando(false)
+
+    }
+
+  }
+
+
 
   async function eliminar(id: string) {
+
     setEliminando(id)
+
     setError('')
+
+
     try {
-      const res = await fetch('/api/comentarios', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          comentario_id: id,
-          anon_id: loggedIn ? undefined : getAnonId(),
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? 'No se pudo eliminar')
+
+
+      const respuesta = await fetch(
+        '/api/comentarios',
+        {
+          method: 'DELETE',
+
+          headers: {
+            'Content-Type': 'application/json',
+          },
+
+
+          body: JSON.stringify({
+
+            comentario_id: id,
+
+            anon_id: loggedIn
+              ? undefined
+              : getAnonId(),
+
+          }),
+
+        }
+      )
+
+
+      const datos = await respuesta.json()
+
+
+      if (!respuesta.ok) {
+
+        setError(
+          datos.error ?? 'No se pudo eliminar'
+        )
+
         return
+
       }
-      setComentarios((prev) => prev.filter((c) => c.id !== id))
-      setCount((prev) => Math.max(0, prev - 1))
+
+
+      setComentarios(
+        (previos) =>
+          previos.filter(
+            (comentario) => comentario.id !== id
+          )
+      )
+
+
+      setCount(
+        (actual) =>
+          Math.max(0, actual - 1)
+      )
+
+
       setTexto('')
+
+      setEditando(false)
+
       setComentarioAEliminar(null)
+
+
+
     } catch {
-      setError('Ocurrió un error inesperado')
+
+      setError(
+        'Ocurrió un error inesperado'
+      )
+
+
     } finally {
+
       setEliminando(null)
+
     }
+
   }
 
-  return (
+
+
+  return ( 
     <div className={cn('flex flex-col', className)}>
-      <button
-        type="button"
-        onClick={toggle}
-        className="flex items-center gap-1.5 text-xs font-medium text-tinta-suave hover:text-tinta transition-colors"
+
+  <button
+    type="button"
+    onClick={toggle}
+    className="
+      flex items-center gap-1.5
+      text-xs font-medium
+      text-tinta-suave
+      hover:text-tinta
+      transition-colors
+    "
+  >
+
+    <MessageSquare className="h-3.5 w-3.5" />
+
+    {count} comentario{count !== 1 ? 's' : ''}
+
+    {
+      abierto
+        ? <ChevronUp className="h-3 w-3" />
+        : <ChevronDown className="h-3 w-3" />
+    }
+
+  </button>
+
+
+  {
+    abierto && (
+
+      <div
+        className="
+          mt-3
+          flex flex-col
+          gap-3
+          border-t
+          border-linea
+          pt-3
+        "
       >
-        <MessageSquare className="h-3.5 w-3.5" />
-        {count} comentario{count !== 1 ? 's' : ''}
-        {abierto ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-      </button>
 
-      {abierto && (
-        <div className="mt-3 flex flex-col gap-3 border-t border-linea pt-3">
-          {cargando ? (
-            <p className="text-xs text-tinta-suave">Cargando comentarios…</p>
+        {
+          cargando ? (
+
+            <p className="text-xs text-tinta-suave">
+              Cargando comentarios...
+            </p>
+
           ) : (
-            <ul className="flex flex-col gap-2.5">
-              {comentarios.map((c) => (
-                <li key={c.id} className="flex flex-col gap-0.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-[11px] text-tinta-suave">
-                      {c.nombre_autor ?? 'Anónimo'} · {formatFecha(c.created_at)}
-                      {c.updated_at !== c.created_at ? ' (editado)' : ''}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      {!c.es_propio && <ReportarButton comentarioId={c.id} />}
-                      {c.es_propio && (
-                        <button
-                          type="button"
-                          title="Eliminar comentario"
-                          aria-label="Eliminar comentario"
-                          onClick={() => setComentarioAEliminar(c.id)}
-                          disabled={eliminando === c.id}
-                          className="rounded p-1 text-tinta-suave hover:bg-lapiz-rojo/10 hover:text-lapiz-rojo disabled:opacity-50 transition-colors"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      )}
+
+            <ul className="flex flex-col gap-3">
+
+              {
+                comentarios.map((comentario) => (
+
+                  <li
+                    key={comentario.id}
+                    className="
+                      rounded-md
+                      bg-papel/60
+                      p-3
+                    "
+                  >
+
+                    <div
+                      className="
+                        flex
+                        justify-between
+                        items-center
+                        gap-2
+                      "
+                    >
+
+                      <span
+                        className="
+                          font-mono
+                          text-[11px]
+                          text-tinta-suave
+                        "
+                      >
+
+                        {comentario.nombre_autor ?? 'Anónimo'}
+
+                        {' · '}
+
+                        {formatFecha(comentario.created_at)}
+
+                      </span>
+
+
+                      <div className="flex items-center gap-2">
+
+
+                        {
+                          !comentario.es_propio && (
+                            <ReportarButton
+                              comentarioId={comentario.id}
+                            />
+                          )
+                        }
+
+
+
+                        {
+                          comentario.es_propio && (
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditando(true)
+                                setTexto(comentario.contenido)
+                              }}
+                              className="
+                                text-xs
+                                text-tinta-suave
+                                hover:text-tinta
+                              "
+                            >
+
+                              Editar comentario
+
+                            </button>
+
+                          )
+                        }
+
+
+
+                        {
+                          comentario.es_propio && (
+
+                            <button
+                              type="button"
+                              title="Eliminar comentario"
+                              aria-label="Eliminar comentario"
+                              onClick={() =>
+                                setComentarioAEliminar(
+                                  comentario.id
+                                )
+                              }
+                              disabled={
+                                eliminando === comentario.id
+                              }
+                              className="
+                                text-tinta-suave
+                                hover:text-lapiz-rojo
+                                disabled:opacity-50
+                              "
+                            >
+
+                              <Trash2 className="h-3.5 w-3.5" />
+
+                            </button>
+
+                          )
+                        }
+
+
+                      </div>
+
                     </div>
-                  </div>
-                  <p className="text-sm text-tinta">{c.contenido}</p>
-                </li>
-              ))}
-              {comentarios.length === 0 && <p className="text-xs text-tinta-suave">Sé el primero en comentar.</p>}
+
+
+
+                    <p
+                      className="
+                        mt-2
+                        text-sm
+                        text-tinta
+                      "
+                    >
+
+                      {comentario.contenido}
+
+                    </p>
+
+
+                  </li>
+
+                ))
+              }
+
+
+
+              {
+                comentarios.length === 0 && (
+
+                  <p className="text-xs text-tinta-suave">
+
+                    Todavía no hay comentarios.
+
+                    <br />
+
+                    Comparte tu experiencia con otros estudiantes.
+
+                  </p>
+
+                )
+              }
+
+
             </ul>
-          )}
 
-          <form onSubmit={enviar} className="flex flex-col gap-1.5">
-            <textarea
-              value={texto}
-              onChange={(e) => setTexto(e.target.value)}
-              maxLength={500}
-              rows={2}
-              placeholder={propio ? 'Edita tu comentario…' : 'Escribe un comentario corto…'}
-              className="rounded-md border border-linea bg-papel px-3 py-2 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
-            />
-            {error && <p className="text-xs text-lapiz-rojo">{error}</p>}
-            <Button type="submit" variant="secondary" size="sm" disabled={!texto.trim() || enviando} className="self-end">
-              {enviando ? 'Guardando…' : propio ? 'Guardar cambios' : 'Comentar'}
-            </Button>
-          </form>
-        </div>
-      )}
+          )
+        }
 
-      <Modal open={comentarioAEliminar !== null} onClose={() => !eliminando && setComentarioAEliminar(null)} title="Eliminar comentario">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-lapiz-rojo/10 text-lapiz-rojo">
-              <AlertTriangle className="h-4 w-4" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-medium text-tinta">¿Quieres eliminar tu comentario?</p>
-              <p className="text-xs leading-5 text-tinta-suave">Esta acción no se puede deshacer.</p>
-            </div>
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="secondary" size="sm" onClick={() => setComentarioAEliminar(null)} disabled={eliminando !== null}>
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              variant="danger"
-              size="sm"
-              onClick={() => comentarioAEliminar && eliminar(comentarioAEliminar)}
-              disabled={eliminando !== null}
+
+
+
+        {
+          (!propio || editando) && (
+
+            <form
+              onSubmit={enviar}
+              className="flex flex-col gap-2"
             >
-              {eliminando ? 'Eliminando…' : 'Eliminar'}
-            </Button>
-          </div>
+
+              <textarea
+
+                value={texto}
+
+                onChange={(e) =>
+                  setTexto(e.target.value)
+                }
+
+                maxLength={500}
+
+                rows={2}
+
+                placeholder={
+                  propio
+                    ? 'Actualiza tu comentario...'
+                    : 'Comparte tu experiencia con este parcial...'
+                }
+
+                className="
+                  rounded-md
+                  border
+                  border-linea
+                  bg-papel
+                  px-3
+                  py-2
+                  text-sm
+                  text-tinta
+                  focus:outline-2
+                  focus:outline-lapiz-rojo
+                "
+
+              />
+
+
+
+              {
+                error && (
+
+                  <p className="text-xs text-lapiz-rojo">
+
+                    {error}
+
+                  </p>
+
+                )
+              }
+
+
+
+              <div className="flex justify-end gap-2">
+
+
+                {
+                  editando && (
+
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+
+                        setEditando(false)
+
+                        setTexto(
+                          propio?.contenido ?? ''
+                        )
+
+                      }}
+                    >
+
+                      Cancelar
+
+                    </Button>
+
+                  )
+                }
+
+
+
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  size="sm"
+                  disabled={
+                    !texto.trim() ||
+                    enviando
+                  }
+                >
+
+                  {
+                    enviando
+                      ? 'Guardando...'
+                      : propio
+                        ? 'Guardar cambios'
+                        : 'Comentar'
+                  }
+
+                </Button>
+
+
+              </div>
+
+
+            </form>
+
+          )
+        }
+
+
+      </div>
+
+    )
+  }
+
+
+
+
+  <Modal
+
+    open={
+      comentarioAEliminar !== null
+    }
+
+    onClose={() =>
+      !eliminando &&
+      setComentarioAEliminar(null)
+    }
+
+    title="Eliminar comentario"
+
+  >
+
+    <div className="flex flex-col gap-4">
+
+
+      <div className="flex items-start gap-3">
+
+        <div
+          className="
+            flex
+            h-9
+            w-9
+            items-center
+            justify-center
+            rounded-full
+            bg-lapiz-rojo/10
+            text-lapiz-rojo
+          "
+        >
+
+          <AlertTriangle className="h-4 w-4" />
+
         </div>
-      </Modal>
+
+
+
+        <div>
+
+          <p className="text-sm font-medium text-tinta">
+
+            ¿Eliminar este comentario?
+
+          </p>
+
+
+          <p className="text-xs text-tinta-suave">
+
+            Esta acción no se puede deshacer.
+
+          </p>
+
+
+        </div>
+
+
+      </div>
+
+
+
+
+      <div className="flex justify-end gap-2">
+
+
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            setComentarioAEliminar(null)
+          }
+          disabled={
+            eliminando !== null
+          }
+        >
+
+          Cancelar
+
+        </Button>
+
+
+
+
+        <Button
+          type="button"
+          variant="danger"
+          size="sm"
+          onClick={() =>
+            comentarioAEliminar &&
+            eliminar(comentarioAEliminar)
+          }
+          disabled={
+            eliminando !== null
+          }
+        >
+
+          {
+            eliminando
+              ? 'Eliminando...'
+              : 'Eliminar'
+          }
+
+        </Button>
+
+
+      </div>
+
+
     </div>
-  )
+
+
+  </Modal>
+
+
+</div>
+)
 }
