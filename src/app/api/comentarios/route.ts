@@ -3,6 +3,16 @@ import { createClient } from '@/lib/supabase/server'
 
 const MAX_COMENTARIO_CHARS = 500
 
+type ComentarioCreado = {
+  id: string
+  contenido: string
+  created_at: string
+  updated_at: string | null
+  nombre_autor: string | null
+  es_propio: boolean
+  estado?: string
+}
+
 type EliminacionComentario = { eliminado: boolean }
 
 export async function GET(request: NextRequest) {
@@ -25,7 +35,7 @@ export async function POST(request: NextRequest) {
   if (!documento_id || !contenido?.trim()) return NextResponse.json({ error: 'Faltan campos requeridos: documento_id, contenido' }, { status: 400 })
   if (contenido.trim().length > MAX_COMENTARIO_CHARS) return NextResponse.json({ error: `El comentario no puede superar ${MAX_COMENTARIO_CHARS} caracteres` }, { status: 400 })
 
-  const { data, error } = await supabase.rpc('comentar_documento', {
+  const { data: dataSinTipo, error } = await supabase.rpc('comentar_documento', {
     p_documento_id: documento_id,
     p_contenido: contenido.trim(),
     p_anon_id: anon_id ?? null,
@@ -33,7 +43,8 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const moderado = data?.estado === 'reportado'
+  const data = dataSinTipo as ComentarioCreado
+  const moderado = data.estado === 'reportado'
 
   return NextResponse.json(
     {
