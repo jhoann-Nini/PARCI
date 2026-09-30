@@ -5,6 +5,15 @@ import {
 
 export const MAX_COMENTARIO_CHARS = 500
 
+const EXPRESIONES_INAPROPIADAS = [
+  /\bmierda\b/i,
+  /\bhijueputa\b/i,
+  /\bhijo de puta\b/i,
+  /\bmarica\b/i,
+  /\bmalparid[oa]\b/i,
+  /\bverga\b/i,
+]
+
 export function validarComentario(contenido: unknown) {
   if (typeof contenido !== 'string' || !contenido.trim()) {
     return { valido: false, error: 'Faltan campos requeridos: documento_id, contenido' }
@@ -18,6 +27,19 @@ export function validarComentario(contenido: unknown) {
   }
 
   return { valido: true, error: null }
+}
+
+export function comentarioRequiereModeracion(contenido: string) {
+  const texto = contenido.trim()
+
+  const contieneExpresionInapropiada = EXPRESIONES_INAPROPIADAS.some(
+    (expresion) => expresion.test(texto)
+  )
+
+  const cantidadEnlaces = (texto.match(/https?:\/\/\S+/gi) ?? []).length
+  const excesoDeEnlaces = cantidadEnlaces >= 2
+
+  return contieneExpresionInapropiada || excesoDeEnlaces
 }
 
 export function obtenerExtension(nombre: string) {
