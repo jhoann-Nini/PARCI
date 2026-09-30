@@ -22,6 +22,12 @@ export default async function CarrerasPage() {
     .from('carreras')
     .select('id, nombre, color')
     .order('nombre')
+  
+  const carrerasTipadas: Carrera[] = (carreras ?? []).map((carrera) => ({
+    id: carrera.id,
+    nombre: carrera.nombre,
+    color: carrera.color as ColorCarrera,
+  }))
 
   const { data: documentos } = await supabase
     .from('documentos')
@@ -44,7 +50,7 @@ export default async function CarrerasPage() {
     }
   }
 
-  const carrerasDisponibles = (carreras ?? []).filter(
+  const carrerasDisponibles = carrerasTipadas.filter(
     (carrera) => (documentosPorCarrera.get(carrera.id) ?? 0) > 0
   )
 
