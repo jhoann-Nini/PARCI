@@ -85,7 +85,7 @@ export default async function ModeracionPage({
       ),
       reportes ( id, motivo, fecha )
     `)
-    .in('estado', ['reportado', 'activo'])
+    .eq('estado', 'reportado')
     .order('fecha_subida', { ascending: false })
 
   const { data: comentarios } = await supabase
@@ -113,9 +113,7 @@ export default async function ModeracionPage({
     .in('estado', ['activo', 'reportado', 'eliminado'])
     .order('created_at', { ascending: false })
 
-  const todos = (documentos ?? []) as unknown as (DocumentoReportado & { estado: string })[]
-  const reportados = todos.filter((d) => d.estado === 'reportado')
-  const activos = todos.filter((d) => d.estado === 'activo')
+  const reportados = (documentos ?? []) as unknown as DocumentoReportado[]
   const todosComentarios = (comentarios ?? []) as unknown as ComentarioReportado[]
   const comentariosFiltrados =
     filtroComentario === 'todos'
@@ -216,32 +214,6 @@ export default async function ModeracionPage({
         )}
       </section>
 
-      <section className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <h2 className="font-mono text-lg font-bold text-tinta">Todos los documentos</h2>
-          <p className="text-sm text-tinta-suave">
-            Sin reportes, pero también puedes retirarlos si hace falta.
-          </p>
-        </div>
-
-        {activos.length === 0 ? (
-          <p className="text-sm text-tinta-suave">No hay documentos activos.</p>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {activos.map((doc) => (
-              <ModeracionCard
-                key={doc.id}
-                id={doc.id}
-                materia={doc.oferta?.materia?.nombre ?? '—'}
-                carrera={doc.oferta?.materia?.carrera?.nombre ?? '—'}
-                carreraColor={doc.oferta?.materia?.carrera?.color ?? 'aula'}
-                semestre={doc.oferta?.semestre ?? '—'}
-                corte={doc.corte}
-              />
-            ))}
-          </div>
-        )}
-      </section>
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
