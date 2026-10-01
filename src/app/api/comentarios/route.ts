@@ -41,7 +41,23 @@ export async function POST(request: NextRequest) {
     p_anon_id: anon_id ?? null,
   }).single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    if (error.message.includes('COMENTARIO_PROHIBIDO')) {
+      return NextResponse.json(
+        { error: 'El comentario contiene contenido no permitido.' },
+        { status: 422 }
+      )
+    }
+
+    if (error.message.includes('COMENTARIO_SPAM')) {
+      return NextResponse.json(
+        { error: 'El comentario contiene demasiado spam o enlaces.' },
+        { status: 422 }
+      )
+    }
+
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
 
   const data = dataSinTipo as ComentarioCreado
   const moderado = data.estado === 'reportado'
