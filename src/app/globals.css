@@ -36,3 +36,8 @@ body {
 button, a, input, select { -webkit-tap-highlight-color: transparent; }
 
 * { border-color: var(--color-linea); }
+
+:focus-visible {
+  outline: 2px solid var(--color-lapiz-rojo);
+  outline-offset: 2px;
+}
