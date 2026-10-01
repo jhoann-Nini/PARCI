@@ -43,7 +43,7 @@ export function ModeracionCard({
       const res = await fetch(`/api/moderacion/archivo?documento_id=${id}`)
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error ?? 'No se pudo abrir el archivo')
+        setError('No pudimos abrir el archivo. Inténtalo de nuevo.')
         return
       }
       window.open(data.url, '_blank', 'noopener,noreferrer')
@@ -63,7 +63,7 @@ export function ModeracionCard({
       .eq('id', id)
 
     if (updateError) {
-      setError(updateError.message)
+      setError('No pudimos actualizar este documento. Inténtalo de nuevo.')
       setLoading(null)
       return
     }
@@ -122,7 +122,7 @@ export function ModeracionCard({
         </div>
       )}
 
-      {error && <p className="text-xs text-lapiz-rojo">{error}</p>}
+      {error && <p role="alert" className="text-xs text-lapiz-rojo">{error}</p>}
 
       <div className="mt-auto flex gap-2 pt-1">
         {reportes.length > 0 && (
