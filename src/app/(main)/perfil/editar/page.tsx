@@ -12,7 +12,7 @@ export default async function EditarPerfilPage() {
   if (!user) redirect('/login')
 
   const [{ data: perfil }, { data: carreras }] = await Promise.all([
-    supabase.from('perfiles').select('nombre, correo_institucional, carrera_id').eq('id', user.id).single(),
+    supabase.from('perfiles').select('nombre, correo_institucional, carrera_id, semestre').eq('id', user.id).single(),
     supabase.from('carreras').select('id, nombre').order('nombre'),
   ])
 
@@ -38,6 +38,15 @@ export default async function EditarPerfilPage() {
             <select id="carrera_id" name="carrera_id" defaultValue={perfil?.carrera_id ?? ''} className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo">
               <option value="">Selecciona tu carrera</option>
               {carreras?.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="semestre" className="font-mono text-sm font-medium">Semestre</label>
+            <select id="semestre" name="semestre" defaultValue={perfil?.semestre?.toString() ?? ''} required className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo">
+              <option value="">Selecciona tu semestre</option>
+              {Array.from({ length: 10 }, (_, index) => index + 1).map((numero) => (
+                <option key={numero} value={numero}>{numero} semestre</option>
+              ))}
             </select>
           </div>
           <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
