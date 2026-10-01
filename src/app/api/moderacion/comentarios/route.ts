@@ -57,12 +57,6 @@ export async function GET() {
 export async function PATCH(request: NextRequest) {
   const supabase = await createClient()
 
-  const { data: esModerador, error: rolError } = await supabase.rpc('is_moderador')
-
-  if (rolError || !esModerador) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
-  }
-
   const body = await request.json()
   const comentarioId = body.comentario_id
   const estado = body.estado as EstadoResolucion
@@ -75,15 +69,21 @@ export async function PATCH(request: NextRequest) {
   }
 
   const { data, error } = await supabase
-    .from('comentarios')
-    .update({ estado })
-    .eq('id', comentarioId)
-    .eq('estado', 'reportado')
-    .select('id, estado')
+    .rpc('resolver_comentario_moderacion', {
+      p_comentario_id: comentarioId,
+      p_estado: estado,
+    })
     .single()
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  if (!data) {
+    return NextResponse.json(
+      { error: 'El comentario ya no está reportado o no existe' },
+      { status: 404 }
+    )
   }
 
   return NextResponse.json(data)
