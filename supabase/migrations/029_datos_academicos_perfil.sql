@@ -24,7 +24,31 @@ begin
     v_carrera_id := (new.raw_user_meta_data->>'carrera_id')::uuid;
   end if;
 
-  if coalesce(new.raw_user_meta_data->>'semestre', '') ~ '^[1-9]|10$' then
+  if coalesce(new.raw_user_meta_data->>'semestre', '') ~ '^(?:[1-9]|10) then
+    v_semestre := (new.raw_user_meta_data->>'semestre')::smallint;
+  end if;
+
+  insert into public.perfiles (
+    id,
+    correo_institucional,
+    nombre,
+    carrera_id,
+    semestre,
+    rol
+  )
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data->>'nombre', split_part(new.email, '@', 1)),
+    v_carrera_id,
+    v_semestre,
+    'estudiante'
+  );
+
+  return new;
+end;
+$$;
+ then
     v_semestre := (new.raw_user_meta_data->>'semestre')::smallint;
   end if;
 
