@@ -10,11 +10,12 @@ const PASOS = [
 
 export function BarraProgreso({ paso }: BarraProgresoProps) {
   return (
-    <div className="flex items-center">
+    <nav aria-label="Progreso de subida" className="flex items-center">
       {PASOS.map((p, i) => (
         <div key={p.n} className="flex flex-1 items-center last:flex-none">
           <div className="flex flex-col items-center gap-1.5">
             <div
+              aria-current={p.n === paso ? 'step' : undefined}
               className={`flex h-7 w-7 items-center justify-center rounded-full border-2 font-mono text-xs font-bold transition-colors ${
                 p.n < paso
                   ? 'border-lapiz-rojo bg-lapiz-rojo text-papel'
@@ -41,6 +42,6 @@ export function BarraProgreso({ paso }: BarraProgresoProps) {
           )}
         </div>
       ))}
-    </div>
+    </nav>
   )
 }
