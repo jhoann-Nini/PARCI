@@ -193,11 +193,11 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
             </div>
             {pestaña === 'guardados' ? (
               docs.length === 0
-                ? <Empty text="Todavía no tienes parciales guardados." />
+                ? <Empty text="Todavía no has guardado parciales. Cuando encuentres uno útil, guárdalo para volver rápido." />
                 : <div className="grid gap-4 sm:grid-cols-2">{docs.map((doc) => <ExamenCard key={doc.id} {...doc} />)}</div>
             ) : (
               misDocumentos.length === 0
-                ? <Empty text="Tus parciales subidos aparecerán aquí." action="Subir mi parcial" />
+                ? <Empty text="Aquí aparecerán los parciales que compartas con otros estudiantes." action="Subir mi parcial" />
                 : <div className="grid gap-3 sm:grid-cols-2">
                     {misDocumentos.map((doc) => <MiParcialItem key={doc.id} {...doc} />)}
                   </div>
