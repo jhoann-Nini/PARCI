@@ -106,7 +106,7 @@ export default function RegistroPage() {
     return (
       <div className="flex min-h-dvh items-center justify-center px-4">
         <Card className="flex w-full max-w-sm flex-col gap-4 p-8 text-center">
-          <p className="font-mono text-lg font-bold text-tinta">¡Ya casi!</p>
+          <h1 className="font-mono text-lg font-bold text-tinta">¡Ya casi!</h1>
           <p className="text-sm text-tinta-suave">
             Revisa tu bandeja de entrada en{' '}
             <strong className="text-tinta">{email}</strong> y confirma tu cuenta.
@@ -135,8 +135,12 @@ export default function RegistroPage() {
         <form onSubmit={handleRegistro} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="nombre" className="font-mono text-sm font-medium text-tinta">Nombre</label>
+            <p id="nombre-ayuda" className="text-xs text-tinta-suave">Usa el nombre con el que quieres aparecer en Parci.</p>
             <Input
               id="nombre"
+              name="nombre"
+              autoComplete="name"
+              aria-describedby="nombre-ayuda"
               placeholder="Tu nombre completo"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
@@ -148,6 +152,8 @@ export default function RegistroPage() {
             <label htmlFor="email" className="font-mono text-sm font-medium text-tinta">Correo institucional</label>
             <Input
               id="email"
+              name="email"
+              autoComplete="email"
               type="email"
               placeholder={`usuario@${DOMINIO_CORREO}`}
               value={email}
@@ -158,8 +164,11 @@ export default function RegistroPage() {
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="carrera_id" className="font-mono text-sm font-medium text-tinta">Carrera</label>
+            <p id="carrera-ayuda" className="text-xs text-tinta-suave">La usaremos para mostrarte parciales de tu carrera.</p>
             <select
               id="carrera_id"
+              name="carrera_id"
+              aria-describedby="carrera-ayuda"
               value={carreraId}
               onChange={(e) => setCarreraId(e.target.value)}
               required
@@ -176,8 +185,11 @@ export default function RegistroPage() {
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="semestre" className="font-mono text-sm font-medium text-tinta">Semestre</label>
+            <p id="semestre-ayuda" className="text-xs text-tinta-suave">El semestre que cursas actualmente.</p>
             <select
               id="semestre"
+              name="semestre"
+              aria-describedby="semestre-ayuda"
               value={semestre}
               onChange={(e) => setSemestre(e.target.value)}
               required
@@ -194,8 +206,12 @@ export default function RegistroPage() {
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="password" className="font-mono text-sm font-medium text-tinta">Contraseña</label>
+            <p id="password-ayuda" className="text-xs text-tinta-suave">Mínimo 8 caracteres.</p>
             <Input
               id="password"
+              name="password"
+              autoComplete="new-password"
+              aria-describedby="password-ayuda"
               type="password"
               placeholder="Mínimo 8 caracteres"
               value={password}
@@ -204,7 +220,7 @@ export default function RegistroPage() {
             />
           </div>
 
-          {error && <p className="text-sm text-lapiz-rojo">{error}</p>}
+          {error && <p role="alert" className="text-sm text-lapiz-rojo">{error}</p>}
 
           <Button type="submit" disabled={loading || carreras.length === 0} className="mt-2">
             {loading ? 'Creando cuenta…' : 'Crear cuenta'}
