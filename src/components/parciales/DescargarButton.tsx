@@ -16,20 +16,30 @@ export function DescargarButton({ documentoId, loggedIn, archivoUrl }: Descargar
   const [bloqueado, setBloqueado] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [previewKind, setPreviewKind] = useState<'pdf' | 'image' | 'external' | null>(null)
+  const [error, setError] = useState('')
 
   async function abrir() {
     if (loading) return
     setLoading(true)
+    setError('')
     try {
       const res = await fetch('/api/descargas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ documento_id: documentoId, anon_id: loggedIn ? undefined : getAnonId() }) })
-      if (!res.ok) return
+      if (!res.ok) {
+        setError('No pudimos abrir el archivo. Inténtalo de nuevo.')
+        return
+      }
       const data = await res.json() as { permitido: boolean; url?: string }
       if (!data.permitido) { setBloqueado(true); return }
-      if (!data.url) return
+      if (!data.url) {
+        setError('No encontramos el archivo. Inténtalo de nuevo.')
+        return
+      }
       const ext = extension(archivoUrl ?? '')
       if (ext === 'pdf') { setPreviewKind('pdf'); setPreviewUrl(data.url) }
       else if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) { setPreviewKind('image'); setPreviewUrl(data.url) }
       else { setPreviewKind('external'); setPreviewUrl(data.url) }
+    } catch {
+      setError('No pudimos abrir el archivo. Revisa tu conexión e inténtalo de nuevo.')
     } finally { setLoading(false) }
   }
 
@@ -39,6 +49,8 @@ export function DescargarButton({ documentoId, loggedIn, archivoUrl }: Descargar
     <button type="button" onClick={abrir} disabled={loading} className="flex items-center gap-1.5 text-xs font-medium text-lapiz-rojo hover:underline disabled:opacity-60">
       <Download className="h-3.5 w-3.5" /> {loading ? 'Abriendo…' : 'Ver archivo'}
     </button>
+
+    {error && <p role="alert" className="mt-2 text-xs text-lapiz-rojo">{error}</p>}
 
     <Modal open={!!previewUrl} onClose={cerrar} title={previewKind === 'pdf' ? 'Vista previa del PDF' : previewKind === 'image' ? 'Vista previa de imagen' : 'Archivo'}>
       {previewUrl && previewKind === 'pdf' && <iframe src={previewUrl} title="Vista previa PDF" className="h-[70vh] w-full rounded border border-linea" />}
