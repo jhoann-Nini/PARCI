@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
@@ -9,13 +9,42 @@ import { Card } from '@/components/ui/Card'
 import { Logo } from '@/components/ui/Logo'
 import { DOMINIO_CORREO } from '@/lib/constants'
 
+type Carrera = {
+  id: string
+  nombre: string
+}
+
+const SEMESTRES = Array.from({ length: 10 }, (_, index) => index + 1)
+
 export default function RegistroPage() {
-  const [nombre,   setNombre]   = useState('')
-  const [email,    setEmail]    = useState('')
+  const [nombre, setNombre] = useState('')
+  const [email, setEmail] = useState('')
+  const [carreraId, setCarreraId] = useState('')
+  const [semestre, setSemestre] = useState('')
   const [password, setPassword] = useState('')
-  const [error,    setError]    = useState('')
-  const [success,  setSuccess]  = useState(false)
-  const [loading,  setLoading]  = useState(false)
+  const [carreras, setCarreras] = useState<Carrera[]>([])
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    async function cargarCarreras() {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('carreras')
+        .select('id, nombre')
+        .order('nombre')
+
+      if (error) {
+        setError('No se pudieron cargar las carreras. Intenta nuevamente.')
+        return
+      }
+
+      setCarreras(data ?? [])
+    }
+
+    cargarCarreras()
+  }, [])
 
   async function handleRegistro(e: React.FormEvent) {
     e.preventDefault()
@@ -25,6 +54,17 @@ export default function RegistroPage() {
       setError(`Solo se aceptan correos @${DOMINIO_CORREO}`)
       return
     }
+
+    if (!carreraId) {
+      setError('Selecciona tu carrera')
+      return
+    }
+
+    if (!semestre) {
+      setError('Selecciona tu semestre')
+      return
+    }
+
     if (password.length < 8) {
       setError('La contraseña debe tener al menos 8 caracteres')
       return
@@ -37,7 +77,11 @@ export default function RegistroPage() {
       email,
       password,
       options: {
-        data: { nombre },
+        data: {
+          nombre,
+          carrera_id: carreraId,
+          semestre: Number(semestre),
+        },
         emailRedirectTo: `${window.location.origin}/auth/confirm?next=/explorar`,
       },
     })
@@ -48,9 +92,6 @@ export default function RegistroPage() {
       return
     }
 
-    // Supabase responde 200 sin error aunque el correo ya exista (evita
-    // enumeración), pero omite la identity en ese caso: es la única forma
-    // de distinguirlo del lado del cliente.
     if (data.user?.identities?.length === 0) {
       setError('Ese correo ya está registrado. Inicia sesión o recupera tu contraseña.')
       setLoading(false)
@@ -64,7 +105,7 @@ export default function RegistroPage() {
   if (success) {
     return (
       <div className="flex min-h-dvh items-center justify-center px-4">
-        <Card className="w-full max-w-sm p-8 flex flex-col gap-4 text-center">
+        <Card className="flex w-full max-w-sm flex-col gap-4 p-8 text-center">
           <p className="font-mono text-lg font-bold text-tinta">¡Ya casi!</p>
           <p className="text-sm text-tinta-suave">
             Revisa tu bandeja de entrada en{' '}
@@ -83,7 +124,7 @@ export default function RegistroPage() {
 
   return (
     <div className="flex min-h-dvh items-center justify-center px-4">
-      <Card className="w-full max-w-sm p-8 flex flex-col gap-6">
+      <Card className="flex w-full max-w-sm flex-col gap-6 p-8">
         <div className="flex flex-col gap-1">
           <Link href="/">
             <Logo className="text-2xl" />
@@ -93,8 +134,9 @@ export default function RegistroPage() {
 
         <form onSubmit={handleRegistro} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-sm font-medium text-tinta">Nombre</label>
+            <label htmlFor="nombre" className="font-mono text-sm font-medium text-tinta">Nombre</label>
             <Input
+              id="nombre"
               placeholder="Tu nombre completo"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
@@ -103,8 +145,9 @@ export default function RegistroPage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-sm font-medium text-tinta">Correo institucional</label>
+            <label htmlFor="email" className="font-mono text-sm font-medium text-tinta">Correo institucional</label>
             <Input
+              id="email"
               type="email"
               placeholder={`usuario@${DOMINIO_CORREO}`}
               value={email}
@@ -114,8 +157,45 @@ export default function RegistroPage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-sm font-medium text-tinta">Contraseña</label>
+            <label htmlFor="carrera_id" className="font-mono text-sm font-medium text-tinta">Carrera</label>
+            <select
+              id="carrera_id"
+              value={carreraId}
+              onChange={(e) => setCarreraId(e.target.value)}
+              required
+              className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
+            >
+              <option value="">Selecciona tu carrera</option>
+              {carreras.map((carrera) => (
+                <option key={carrera.id} value={carrera.id}>
+                  {carrera.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="semestre" className="font-mono text-sm font-medium text-tinta">Semestre</label>
+            <select
+              id="semestre"
+              value={semestre}
+              onChange={(e) => setSemestre(e.target.value)}
+              required
+              className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
+            >
+              <option value="">Selecciona tu semestre</option>
+              {SEMESTRES.map((numero) => (
+                <option key={numero} value={numero}>
+                  {numero} semestre
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="password" className="font-mono text-sm font-medium text-tinta">Contraseña</label>
             <Input
+              id="password"
               type="password"
               placeholder="Mínimo 8 caracteres"
               value={password}
@@ -126,7 +206,7 @@ export default function RegistroPage() {
 
           {error && <p className="text-sm text-lapiz-rojo">{error}</p>}
 
-          <Button type="submit" disabled={loading} className="mt-2">
+          <Button type="submit" disabled={loading || carreras.length === 0} className="mt-2">
             {loading ? 'Creando cuenta…' : 'Crear cuenta'}
           </Button>
         </form>
