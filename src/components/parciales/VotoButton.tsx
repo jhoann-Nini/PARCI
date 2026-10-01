@@ -19,11 +19,12 @@ export function VotoButton({
   const [votos, setVotos] = useState(votosInicial)
   const [yaVoto, setYaVoto] = useState(yaVotoInicial)
   const [loading, setLoading] = useState(false)
+  const [mensaje, setMensaje] = useState('')
 
   async function votar() {
     if (yaVoto || loading) return
     setLoading(true)
-    try {
+    setMensaje('')
       const res = await fetch('/api/votos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -32,10 +33,14 @@ export function VotoButton({
           anon_id: loggedIn ? undefined : getAnonId(),
         }),
       })
-      if (!res.ok) return
+      if (!res.ok) {
+        setMensaje('No pudimos registrar tu voto. Inténtalo de nuevo.')
+        return
+      }
       const data = await res.json() as { votos_count: number; ya_voto: boolean }
       setVotos(data.votos_count)
       setYaVoto(true)
+      setMensaje('Gracias. Marcaste que este parcial te sirvió.')
     } finally {
       setLoading(false)
     }
@@ -47,6 +52,7 @@ export function VotoButton({
       onClick={votar}
       disabled={yaVoto || loading}
       aria-pressed={yaVoto}
+      aria-label={yaVoto ? `Este parcial te sirvió. ${votos} votos` : `Marcar que este parcial te sirvió. ${votos} votos`}
       title={yaVoto ? 'Ya marcaste que te sirvió' : 'Marcar que te sirvió'}
       className={cn(
         'flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-xs font-medium transition-colors disabled:cursor-default',
@@ -56,8 +62,29 @@ export function VotoButton({
         className
       )}
     >
-      <ThumbsUp className={cn('h-3.5 w-3.5', yaVoto && 'fill-current')} />
+      <ThumbsUp aria-hidden="true" className={cn('h-3.5 w-3.5', yaVoto && 'fill-current')} />
       {votos}
     </button>
+  )
+
+  return (
+    <div className={cn('flex flex-col items-start', className)}>
+      <button
+        type="button"
+        onClick={votar}
+        disabled={yaVoto || loading}
+        aria-pressed={yaVoto}
+        aria-label={yaVoto ? `Este parcial te sirvió. ${votos} votos` : `Marcar que este parcial te sirvió. ${votos} votos`}
+        title={yaVoto ? 'Ya marcaste que te sirvió' : 'Marcar que te sirvió'}
+        className={cn(
+          'flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-xs font-medium transition-colors disabled:cursor-default',
+          yaVoto ? 'border-resaltador bg-resaltador text-[#4A3800]' : 'border-linea text-tinta-suave hover:border-tinta-suave',
+        )}
+      >
+        <ThumbsUp aria-hidden="true" className={cn('h-3.5 w-3.5', yaVoto && 'fill-current')} />
+        {votos}
+      </button>
+      {mensaje && <span role={mensaje.startsWith('No') ? 'alert' : 'status'} className="sr-only">{mensaje}</span>}
+    </div>
   )
 }
