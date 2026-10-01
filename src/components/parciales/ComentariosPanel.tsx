@@ -53,6 +53,7 @@ export function ComentariosPanel({
     useState<string | null>(null)
 
   const [error, setError] = useState('')
+  const [confirmacion, setConfirmacion] = useState('')
 
   const [editando, setEditando] = useState(false)
 
@@ -154,6 +155,7 @@ export function ComentariosPanel({
     setEnviando(true)
 
     setError('')
+    setConfirmacion('')
 
 
     try {
@@ -221,7 +223,7 @@ export function ComentariosPanel({
 
 
       setEditando(false)
-
+      setConfirmacion(propio ? 'Comentario actualizado.' : 'Comentario publicado.')
 
     } catch {
 
@@ -245,7 +247,7 @@ export function ComentariosPanel({
     setEliminando(id)
 
     setError('')
-
+    setConfirmacion('')
 
     try {
 
@@ -307,8 +309,7 @@ export function ComentariosPanel({
       setEditando(false)
 
       setComentarioAEliminar(null)
-
-
+      setConfirmacion('Comentario eliminado.')
 
     } catch {
 
@@ -599,6 +600,8 @@ export function ComentariosPanel({
               }
 
 
+
+              {confirmacion && <p role="status" className="text-xs text-verde-musgo">{confirmacion}</p>}
 
               <p id={`comentario-ayuda-${documentoId}`} className="text-xs text-tinta-suave">Máximo 500 caracteres. Escribe algo útil para quienes estudian esta materia.</p>
 
