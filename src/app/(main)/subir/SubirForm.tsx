@@ -89,7 +89,7 @@ export function SubirForm({ carreras }: SubirFormProps) {
       })
       const ofertaData = await ofertaResponse.json()
       if (!ofertaResponse.ok) {
-        setError(ofertaData.error)
+        setError('No pudimos preparar los datos del parcial. Revisa la carrera, materia y semestre e inténtalo de nuevo.')
         return
       }
 
@@ -104,14 +104,14 @@ export function SubirForm({ carreras }: SubirFormProps) {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error)
+        setError(data.error ?? 'No pudimos subir el archivo. Revisa el formato y el tamaño e inténtalo de nuevo.')
         return
       }
 
       setSuccess(true)
       setTimeout(() => router.push('/explorar'), 2000)
     } catch {
-      setError('Ocurrió un error inesperado')
+      setError('No pudimos completar la subida. Revisa tu conexión e inténtalo de nuevo.')
     } finally {
       setLoading(false)
     }
@@ -134,8 +134,9 @@ export function SubirForm({ carreras }: SubirFormProps) {
       {paso === 1 && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-sm font-medium text-tinta">Carrera</label>
+            <label htmlFor="subir-carrera" className="font-mono text-sm font-medium text-tinta">Carrera</label>
             <select
+              id="subir-carrera"
               value={carreraId}
               onChange={(e) => handleCarreraChange(e.target.value)}
               className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
@@ -146,8 +147,9 @@ export function SubirForm({ carreras }: SubirFormProps) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-sm font-medium text-tinta">Materia</label>
+            <label htmlFor="subir-materia" className="font-mono text-sm font-medium text-tinta">Materia</label>
             <select
+              id="subir-materia"
               value={materiaId}
               onChange={(e) => setMateriaId(e.target.value)}
               disabled={!carreraId || materias.length === 0}
@@ -178,8 +180,9 @@ export function SubirForm({ carreras }: SubirFormProps) {
           </p>
 
           <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-sm font-medium text-tinta">Semestre</label>
+            <label htmlFor="subir-semestre" className="font-mono text-sm font-medium text-tinta">Semestre</label>
             <select
+              id="subir-semestre"
               value={semestre}
               onChange={(e) => setSemestre(e.target.value)}
               className="h-10 rounded-md border border-linea bg-papel px-3 text-sm text-tinta focus:outline-2 focus:outline-lapiz-rojo"
@@ -190,13 +193,14 @@ export function SubirForm({ carreras }: SubirFormProps) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-sm font-medium text-tinta">Corte</label>
-            <div className="grid grid-cols-4 gap-2">
+            <span id="subir-corte-label" className="font-mono text-sm font-medium text-tinta">Corte</span</label>
+            <div className="grid grid-cols-4 gap-2" role="group" aria-labelledby="subir-corte-label">
               {CORTES.map((c) => (
                 <button
                   key={c.value}
                   type="button"
                   onClick={() => setCorte(c.value)}
+                  aria-pressed={corte === c.value}
                   className={cn(
                     'h-10 rounded-md border font-mono text-sm font-medium transition-colors',
                     corte === c.value
@@ -277,7 +281,7 @@ export function SubirForm({ carreras }: SubirFormProps) {
             />
           </div>
 
-          {error && <p className="rounded-md bg-lapiz-rojo/10 px-3 py-2 text-sm text-lapiz-rojo">{error}</p>}
+          {error && <p role="alert" className="rounded-md bg-lapiz-rojo/10 px-3 py-2 text-sm text-lapiz-rojo">{error}</p>}
 
           <div className="mt-2 flex gap-2">
             <Button type="button" variant="secondary" onClick={() => setPaso(2)} className="flex-1" disabled={loading}>
