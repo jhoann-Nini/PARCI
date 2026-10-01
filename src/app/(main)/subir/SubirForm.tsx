@@ -246,11 +246,20 @@ export function SubirForm({ carreras }: SubirFormProps) {
             {carreraNombre} · {materiaNombre} · {semestre} · {corteLabel}
           </p>
 
-          <div
+          <label
+            htmlFor="subir-archivo"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if ((e.key === 'Enter' || e.key === ' ') && !loading) {
+                e.preventDefault()
+                fileRef.current?.click()
+              }
+            }}
             onDragOver={(e) => { e.preventDefault(); setArrastrando(true) }}
             onDragLeave={() => setArrastrando(false)}
             onDrop={onDrop}
             onClick={() => fileRef.current?.click()}
+            aria-describedby="subir-archivo-ayuda"
             className={cn(
               'flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-8 text-center transition-colors',
               arrastrando ? 'border-lapiz-rojo bg-lapiz-rojo/5' : 'border-linea hover:border-tinta-suave'
@@ -268,19 +277,20 @@ export function SubirForm({ carreras }: SubirFormProps) {
                 <span className="font-mono text-sm text-tinta-suave">
                   Arrastra tu archivo aquí, o haz clic para buscarlo
                 </span>
-                <span className="text-center text-xs text-tinta-suave">
+                <span id="subir-archivo-ayuda" className="text-center text-xs text-tinta-suave">
                   PDF, JPG, PNG, WEBP, DOC, DOCX, XLS, XLSX, PPT o PPTX · máx. {MAX_ARCHIVO_MB}MB
                 </span>
               </>
             )}
             <input
+              id="subir-archivo"
               ref={fileRef}
               type="file"
               accept={ACCEPT_ARCHIVOS}
               className="sr-only"
               onChange={(e) => validarYAsignarArchivo(e.target.files?.[0])}
             />
-          </div>
+          </label>
 
           {error && <p role="alert" className="rounded-md bg-lapiz-rojo/10 px-3 py-2 text-sm text-lapiz-rojo">{error}</p>}
 
