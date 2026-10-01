@@ -12,7 +12,7 @@ interface TemasInputProps {
   inputId?: string
 }
 
-export function TemasInput({ value, onChange, materiaId }: TemasInputProps) {
+export function TemasInput({ value, onChange, materiaId, inputId }: TemasInputProps) {
   const [input, setInput] = useState('')
   const [sugeridos, setSugeridos] = useState<{ materiaId: string; temas: string[] }>({
     materiaId: '',
