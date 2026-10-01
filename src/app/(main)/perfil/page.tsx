@@ -41,7 +41,7 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
 
   const { data: perfil } = await supabase
     .from('perfiles')
-    .select('nombre, correo_institucional, carrera_id, rol, carreras(nombre, color)')
+    .select('nombre, correo_institucional, carrera_id, semestre, rol, carreras(nombre, color)')
     .eq('id', user.id)
     .single()
 
@@ -136,7 +136,7 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
     .map((p: string) => p[0])
     .join('')
     .toUpperCase()
-  const semestre = user.user_metadata?.semestre ?? '—'
+  const semestre = perfil?.semestre?.toString() ?? '—'
   const miembroDesde = user.created_at
     ? new Intl.DateTimeFormat('es-CO', { month: 'short', year: 'numeric' }).format(new Date(user.created_at))
     : '—'
