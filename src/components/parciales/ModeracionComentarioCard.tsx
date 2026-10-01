@@ -17,6 +17,7 @@ interface ModeracionComentarioCardProps {
   carreraColor: ColorCarrera
   semestre: string
   corte: string
+  estado: string
   reportes: { id: string; motivo: string; fecha: string }[]
 }
 
@@ -29,6 +30,7 @@ export function ModeracionComentarioCard({
   carreraColor,
   semestre,
   corte,
+  estado,
   reportes,
 }: ModeracionComentarioCardProps) {
   const router = useRouter()
@@ -105,10 +107,19 @@ export function ModeracionComentarioCard({
         </ul>
       </div>
 
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span className="text-tinta-suave">Estado</span>
+        <Badge color={estado === 'eliminado' ? 'rojo' : estado === 'reportado' ? 'amarillo' : 'verde'}>
+          {estado === 'eliminado' ? 'Eliminado' : estado === 'reportado' ? 'Reportado' : 'Activo'}
+        </Badge>
+      </div>
+
       {error && <p className="text-xs text-lapiz-rojo">{error}</p>}
 
-      <div className="mt-auto flex gap-2 pt-1">
-        <Button
+      {estado !== 'eliminado' && (
+        <div className="mt-auto flex gap-2 pt-1">
+        {estado === 'reportado' && (
+          <Button
           variant="secondary"
           size="sm"
           disabled={loading !== null}
@@ -116,7 +127,8 @@ export function ModeracionComentarioCard({
           className="flex-1"
         >
           {loading === 'mantener' ? 'Manteniendo…' : 'Mantener'}
-        </Button>
+          </Button>
+        )}
 
         <Button
           variant="danger"
@@ -128,6 +140,7 @@ export function ModeracionComentarioCard({
           {loading === 'eliminar' ? 'Eliminando…' : 'Eliminar'}
         </Button>
       </div>
+      )}
     </Card>
   )
 }
