@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ModeracionCard } from '@/components/parciales/ModeracionCard'
 import { ModeracionComentarioCard } from '@/components/parciales/ModeracionComentarioCard'
+import { PalabrasProhibidasPanel } from '@/components/moderacion/PalabrasProhibidasPanel'
 import type { ColorCarrera } from '@/lib/constants'
 
 type DocumentoReportado = {
@@ -240,6 +241,17 @@ export default async function ModeracionPage({
             ))}
           </div>
         )}
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <h2 className="font-mono text-lg font-bold text-tinta">Palabras prohibidas</h2>
+          <p className="text-sm text-tinta-suave">
+            Administra las palabras que bloquean automáticamente los comentarios.
+          </p>
+        </div>
+
+        <PalabrasProhibidasPanel />
       </section>
     </div>
   )
