@@ -54,7 +54,7 @@ export function FavoritoButton({ documentoId, loggedIn }: FavoritoButtonProps) {
       aria-label={loggedIn ? (guardado ? 'Quitar de favoritos' : 'Guardar parcial') : 'Inicia sesión para guardar'}
       className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-linea text-tinta-suave transition-colors hover:text-resaltador disabled:cursor-not-allowed disabled:opacity-50"
     >
-      <Star className={`h-4 w-4 ${guardado ? 'fill-resaltador text-resaltador' : ''}`} />
+      <Star aria-hidden="true" className={`h-4 w-4 ${guardado ? 'fill-resaltador text-resaltador' : ''}`} />
     </button>
   )
 }
