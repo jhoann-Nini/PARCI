@@ -47,7 +47,7 @@ export function DescargarButton({ documentoId, loggedIn, archivoUrl }: Descargar
 
   return <>
     <button type="button" onClick={abrir} disabled={loading} className="flex items-center gap-1.5 text-xs font-medium text-lapiz-rojo hover:underline disabled:opacity-60">
-      <Download className="h-3.5 w-3.5" /> {loading ? 'Abriendo…' : 'Ver archivo'}
+      <Download aria-hidden="true" className="h-3.5 w-3.5" /> {loading ? 'Abriendo…' : 'Ver archivo'}
     </button>
 
     {error && <p role="alert" className="mt-2 text-xs text-lapiz-rojo">{error}</p>}
@@ -55,7 +55,7 @@ export function DescargarButton({ documentoId, loggedIn, archivoUrl }: Descargar
     <Modal open={!!previewUrl} onClose={cerrar} title={previewKind === 'pdf' ? 'Vista previa del PDF' : previewKind === 'image' ? 'Vista previa de imagen' : 'Archivo'}>
       {previewUrl && previewKind === 'pdf' && <iframe src={previewUrl} title="Vista previa PDF" className="h-[70vh] w-full rounded border border-linea" />}
       {previewUrl && previewKind === 'image' && <div className="flex max-h-[70vh] items-center justify-center overflow-auto"><img src={previewUrl} alt="Vista previa del archivo" className="max-h-[70vh] max-w-full object-contain" /></div>}
-      {previewUrl && previewKind === 'external' && <div className="flex flex-col gap-4"><p className="text-sm text-tinta-suave">Este formato no tiene vista previa directa en el navegador. Puedes abrirlo en una nueva pestaña.</p><a href={previewUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-md bg-tinta px-4 py-2 text-sm font-medium text-papel hover:opacity-90"><ExternalLink className="h-4 w-4" /> Abrir archivo</a></div>}
+      {previewUrl && previewKind === 'external' && <div className="flex flex-col gap-4"><p className="text-sm text-tinta-suave">Este formato no tiene vista previa directa en el navegador. Puedes abrirlo en una nueva pestaña.</p><a href={previewUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-md bg-tinta px-4 py-2 text-sm font-medium text-papel hover:opacity-90"><ExternalLink aria-hidden="true" className="h-4 w-4" /> Abrir archivo</a></div>}
     </Modal>
 
     <Modal open={bloqueado} onClose={() => setBloqueado(false)} title="Ya descargaste 2 parciales">
