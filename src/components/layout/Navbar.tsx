@@ -24,8 +24,8 @@ export async function Navbar() {
           <Logo className="text-xl" />
         </Link>
 
-        <nav className="hidden items-center gap-5 text-sm text-tinta-suave sm:flex">
-          <Link href="/explorar" className="transition-colors hover:text-tinta">Explorar</Link>
+        <nav aria-label="Navegación principal" className="hidden items-center gap-5 text-sm text-tinta-suave sm:flex">
+          <Link href="/explorar" className="transition-colors hover:text-tinta focus-visible:outline-2 focus-visible:outline-lapiz-rojo">Explorar</Link>
           {user && <Link href="/perfil" className="transition-colors hover:text-tinta">Mi perfil</Link>}
           {esModerador && <Link href="/moderacion" className="transition-colors hover:text-tinta">Moderación</Link>}
         </nav>
@@ -55,7 +55,7 @@ export async function Navbar() {
               {esModerador && <Link href="/moderacion" className="rounded px-3 py-2 text-sm hover:bg-white/40">Moderación</Link>}
               {user ? <>
                 <Link href="/subir" className="mt-1 rounded px-3 py-2 text-sm font-medium text-lapiz-rojo hover:bg-white/40">+ Subir parcial</Link>
-                <form action={logout}><button type="submit" className="w-full rounded px-3 py-2 text-left text-sm text-tinta-suave hover:bg-white/40">Salir</button></form>
+                <form action={logout}><button type="submit" className="w-full rounded px-3 py-2 text-left text-sm text-tinta-suave hover:bg-white/40 focus-visible:outline-2 focus-visible:outline-lapiz-rojo">Cerrar sesión</button></form>
               </> : <>
                 <Link href="/login" className="rounded px-3 py-2 text-sm hover:bg-white/40">Iniciar sesión</Link>
                 <Link href="/registro" className="rounded px-3 py-2 text-sm font-medium text-lapiz-rojo hover:bg-white/40">Registrarse</Link>
