@@ -136,7 +136,8 @@ export default function RegistroPage() {
           <Link href="/">
             <Logo className="text-2xl" />
           </Link>
-          <p className="text-sm text-tinta-suave">Crea tu cuenta con correo institucional</p>
+          <h1 className="font-mono text-xl font-bold text-tinta">Crea tu cuenta</h1>
+          <p className="text-sm text-tinta-suave">Regístrate con tu correo institucional y cuéntanos qué estudias.</p>
         </div>
 
         <form onSubmit={handleRegistro} className="flex flex-col gap-4">
