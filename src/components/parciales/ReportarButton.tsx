@@ -82,7 +82,7 @@ export function ReportarButton({ documentoId, comentarioId, className }: Reporta
           className
         )}
       >
-        <Flag className="h-3.5 w-3.5" />
+        <Flag aria-hidden="true" className="h-3.5 w-3.5" />
       </button>
 
       <Modal open={open} onClose={cerrar} title={etiqueta}>
