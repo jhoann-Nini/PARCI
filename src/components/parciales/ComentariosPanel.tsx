@@ -333,6 +333,8 @@ export function ComentariosPanel({
   <button
     type="button"
     onClick={toggle}
+    aria-expanded={abierto}
+    aria-controls={`comentarios-${documentoId}`}
     className="
       flex items-center gap-1.5
       text-xs font-medium
@@ -359,6 +361,7 @@ export function ComentariosPanel({
     abierto && (
 
       <div
+        id={`comentarios-${documentoId}`}
         className="
           mt-3
           flex flex-col
@@ -373,7 +376,7 @@ export function ComentariosPanel({
           cargando ? (
 
             <p className="text-xs text-tinta-suave">
-              Cargando comentarios...
+              Cargando comentarios…
             </p>
 
           ) : (
@@ -521,7 +524,7 @@ export function ComentariosPanel({
 
                     <br />
 
-                    Comparte tu experiencia con otros estudiantes.
+                    Sé el primero en contar qué tal estuvo este parcial.
 
                   </p>
 
@@ -545,8 +548,11 @@ export function ComentariosPanel({
               className="flex flex-col gap-2"
             >
 
-              <textarea
+              <label htmlFor={`comentario-${documentoId}`} className="text-xs font-medium text-tinta">Tu comentario</label>
 
+              <textarea
+                id={`comentario-${documentoId}`}
+                aria-describedby={`comentario-ayuda-${documentoId}`}
                 value={texto}
 
                 onChange={(e) =>
@@ -594,6 +600,8 @@ export function ComentariosPanel({
 
 
 
+              <p id={`comentario-ayuda-${documentoId}`} className="text-xs text-tinta-suave">Máximo 500 caracteres. Escribe algo útil para quienes estudian esta materia.</p>
+
               <div className="flex justify-end gap-2">
 
 
@@ -639,7 +647,7 @@ export function ComentariosPanel({
                       ? 'Guardando...'
                       : propio
                         ? 'Guardar cambios'
-                        : 'Comentar'
+                        : 'Publicar comentario'
                   }
 
                 </Button>
@@ -763,7 +771,7 @@ export function ComentariosPanel({
           {
             eliminando
               ? 'Eliminando...'
-              : 'Eliminar'
+              : 'Eliminar comentario'
           }
 
         </Button>
