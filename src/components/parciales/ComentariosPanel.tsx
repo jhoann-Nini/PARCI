@@ -187,7 +187,7 @@ export function ComentariosPanel({
       if (!respuesta.ok) {
 
         setError(
-          datos.error ?? 'No se pudo guardar el comentario'
+          datos.error ?? 'No pudimos publicar el comentario. Inténtalo de nuevo.'
         )
 
         return
@@ -226,7 +226,7 @@ export function ComentariosPanel({
     } catch {
 
       setError(
-        'Ocurrió un error inesperado'
+        'No pudimos publicar el comentario. Revisa tu conexión e inténtalo de nuevo.'
       )
 
 
@@ -280,7 +280,7 @@ export function ComentariosPanel({
       if (!respuesta.ok) {
 
         setError(
-          datos.error ?? 'No se pudo eliminar'
+          datos.error ?? 'No pudimos eliminar el comentario. Inténtalo de nuevo.'
         )
 
         return
@@ -589,7 +589,7 @@ export function ComentariosPanel({
               {
                 error && (
 
-                  <p className="text-xs text-lapiz-rojo">
+                  <p role="alert" className="text-xs text-lapiz-rojo">
 
                     {error}
 
