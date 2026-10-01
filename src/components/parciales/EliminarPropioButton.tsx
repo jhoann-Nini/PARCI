@@ -30,7 +30,7 @@ export function EliminarPropioButton({ documentoId, className }: EliminarPropioB
       .eq('id', documentoId)
 
     if (updateError) {
-      setError(updateError.message)
+      setError('No pudimos eliminar el parcial. Revisa tu conexión e inténtalo de nuevo.')
       setEliminando(false)
       return
     }
@@ -58,7 +58,7 @@ export function EliminarPropioButton({ documentoId, className }: EliminarPropioB
         <p className="text-sm text-tinta-suave">
           Esto retira el documento de Parci para siempre. ¿Confirmas que quieres eliminarlo?
         </p>
-        {error && <p className="text-sm text-lapiz-rojo">{error}</p>}
+        {error && <p role="alert" className="text-sm text-lapiz-rojo">{error}</p>}
         <div className="flex gap-2">
           <Button variant="secondary" size="sm" className="flex-1" onClick={() => setOpen(false)} disabled={eliminando}>
             Cancelar
