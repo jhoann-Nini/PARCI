@@ -345,14 +345,14 @@ export function ComentariosPanel({
     "
   >
 
-    <MessageSquare className="h-3.5 w-3.5" />
+    <MessageSquare aria-hidden="true" className="h-3.5 w-3.5" />
 
     {count} comentario{count !== 1 ? 's' : ''}
 
     {
       abierto
-        ? <ChevronUp className="h-3 w-3" />
-        : <ChevronDown className="h-3 w-3" />
+        ? <ChevronUp aria-hidden="true" className="h-3 w-3" />
+        : <ChevronDown aria-hidden="true" className="h-3 w-3" />
     }
 
   </button>
@@ -482,7 +482,7 @@ export function ComentariosPanel({
                               "
                             >
 
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
 
                             </button>
 
@@ -706,7 +706,7 @@ export function ComentariosPanel({
           "
         >
 
-          <AlertTriangle className="h-4 w-4" />
+          <AlertTriangle aria-hidden="true" className="h-4 w-4" />
 
         </div>
 
