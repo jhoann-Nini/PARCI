@@ -9,6 +9,7 @@ interface TemasInputProps {
   value: string[]
   onChange: (temas: string[]) => void
   materiaId: string
+  inputId?: string
 }
 
 export function TemasInput({ value, onChange, materiaId }: TemasInputProps) {
@@ -71,6 +72,7 @@ export function TemasInput({ value, onChange, materiaId }: TemasInputProps) {
           <TemaTag key={tema} onRemove={() => quitar(tema)}>{tema}</TemaTag>
         ))}
         <input
+          id={inputId}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
