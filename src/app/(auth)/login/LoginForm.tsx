@@ -54,8 +54,11 @@ export function LoginForm() {
 
       <form onSubmit={handleLogin} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="font-mono text-sm font-medium text-tinta">Correo institucional</label>
+          <label htmlFor="login-email" className="font-mono text-sm font-medium text-tinta">Correo institucional</label>
           <Input
+            id="login-email"
+            name="email"
+            autoComplete="email"
             type="email"
             placeholder="usuario@correounivalle.edu.co"
             value={email}
@@ -65,8 +68,11 @@ export function LoginForm() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="font-mono text-sm font-medium text-tinta">Contraseña</label>
+          <label htmlFor="login-password" className="font-mono text-sm font-medium text-tinta">Contraseña</label>
           <Input
+            id="login-password"
+            name="password"
+            autoComplete="current-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -75,7 +81,7 @@ export function LoginForm() {
         </div>
 
         {error && (
-          <p className="text-sm text-lapiz-rojo">{error}</p>
+          <p role="alert" className="text-sm text-lapiz-rojo">{error}</p>
         )}
 
         <Button type="submit" disabled={loading} className="mt-2">
