@@ -133,7 +133,7 @@ export function ModeracionCard({
             onClick={() => resolver('activo', 'aprobar')}
             className="flex-1"
           >
-            {loading === 'aprobar' ? 'Aprobando…' : 'Aprobar'}
+            {loading === 'aprobar' ? 'Manteniendo…' : 'Mantener documento'}
           </Button>
         )}
         <Button
