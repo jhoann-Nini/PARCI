@@ -156,9 +156,9 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
             </div>
             <div className="min-w-0 pt-0.5">
               <h1 className="truncate font-serif text-2xl font-bold sm:text-3xl">{nombre}</h1>
-              <p className="mt-1 truncate font-mono text-[10px] text-azul-aula sm:text-xs">{perfil?.correo_institucional ?? user.email}</p>
+              <p className="mt-1 truncate font-mono text-[10px] text-papel/85 sm:text-xs">{perfil?.correo_institucional ?? user.email}</p>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                {carrera?.nombre && <Badge color="aula">{carrera.nombre}</Badge>}
+                {carrera?.nombre && <Badge color="aula" className="border-papel/20 bg-papel/10 text-papel">{carrera.nombre}</Badge>}
                 <span className="font-mono text-papel/70">↗ {semestre} semestre</span>
               </div>
             </div>
