@@ -87,14 +87,15 @@ export function ReportarButton({ documentoId, comentarioId, className }: Reporta
 
       <Modal open={open} onClose={cerrar} title={etiqueta}>
         {estado === 'enviado' ? (
-          <p className="text-sm text-tinta-suave">Gracias, revisaremos esto pronto.</p>
+          <p role="status" className="text-sm text-tinta-suave">Listo. Recibimos tu reporte y lo revisaremos pronto.</p>
         ) : estado === 'ya-reportado' ? (
-          <p className="text-sm text-tinta-suave">Ya habías reportado esto.</p>
+          <p role="status" className="text-sm text-tinta-suave">Ya habías reportado esto. No necesitas enviarlo otra vez.</p>
         ) : (
           <form onSubmit={enviar} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-sm font-medium text-tinta">Motivo</label>
+              <label htmlFor="motivo-reporte" className="font-mono text-sm font-medium text-tinta">Motivo</label>
               <select
+                id="motivo-reporte"
                 required
                 value={motivo}
                 onChange={(e) => setMotivo(e.target.value as Motivo)}
@@ -109,10 +110,11 @@ export function ReportarButton({ documentoId, comentarioId, className }: Reporta
 
             {motivo === 'Otro' && (
               <div className="flex flex-col gap-1.5">
-                <label className="font-mono text-sm font-medium text-tinta">
+                <label htmlFor="detalle-reporte" className="font-mono text-sm font-medium text-tinta">
                   Cuéntanos más (opcional)
                 </label>
                 <textarea
+                  id="detalle-reporte"
                   value={detalle}
                   onChange={(e) => setDetalle(e.target.value)}
                   rows={3}
@@ -122,7 +124,7 @@ export function ReportarButton({ documentoId, comentarioId, className }: Reporta
             )}
 
             {estado === 'error' && (
-              <p className="text-sm text-lapiz-rojo">Ocurrió un error, intenta de nuevo.</p>
+              <p role="alert" className="text-sm text-lapiz-rojo">No pudimos enviar el reporte. Revisa tu conexión e inténtalo de nuevo.</p>
             )}
 
             <Button type="submit" disabled={!motivo || estado === 'enviando'}>
