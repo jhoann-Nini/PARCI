@@ -87,7 +87,14 @@ export default function RegistroPage() {
     })
 
     if (error) {
-      setError(error.message)
+      const mensaje = error.message.toLowerCase()
+      setError(
+        mensaje.includes('already registered') || mensaje.includes('already exists')
+          ? 'Ese correo ya está registrado. Inicia sesión o recupera tu contraseña.'
+          : mensaje.includes('rate limit')
+            ? 'Hicimos demasiados intentos seguidos. Espera un momento y vuelve a intentarlo.'
+            : 'No pudimos crear tu cuenta. Revisa los datos e inténtalo de nuevo.'
+      )
       setLoading(false)
       return
     }
