@@ -114,7 +114,7 @@ export function ModeracionComentarioCard({
         </Badge>
       </div>
 
-      {error && <p className="text-xs text-lapiz-rojo">{error}</p>}
+      {error && <p role="alert" className="text-xs text-lapiz-rojo">{error}</p>}
 
       {estado !== 'eliminado' && (
         <div className="mt-auto flex gap-2 pt-1">
