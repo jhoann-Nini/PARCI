@@ -109,7 +109,7 @@ export function ModeracionComentarioCard({
 
       <div className="flex items-center justify-between gap-2 text-xs">
         <span className="text-tinta-suave">Estado</span>
-        <Badge color={estado === 'eliminado' ? 'rojo' : estado === 'reportado' ? 'amarillo' : 'verde'}>
+        <Badge color={estado === 'eliminado' ? 'ciruela' : estado === 'reportado' ? 'ocre' : 'musgo'}>
           {estado === 'eliminado' ? 'Eliminado' : estado === 'reportado' ? 'Reportado' : 'Activo'}
         </Badge>
       </div>
