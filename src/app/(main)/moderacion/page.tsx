@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ModeracionCard } from '@/components/parciales/ModeracionCard'
 import { ModeracionComentarioCard } from '@/components/parciales/ModeracionComentarioCard'
@@ -36,7 +37,28 @@ type ComentarioReportado = {
   reportes: { id: string; motivo: string; fecha: string }[]
 }
 
-export default async function ModeracionPage() {
+const FILTROS_COMENTARIOS = [
+  { valor: 'todos', etiqueta: 'Todos' },
+  { valor: 'reportado', etiqueta: 'Reportados' },
+  { valor: 'activo', etiqueta: 'Activos' },
+  { valor: 'eliminado', etiqueta: 'Eliminados' },
+] as const
+
+type FiltroComentario = (typeof FILTROS_COMENTARIOS)[number]['valor']
+
+export default async function ModeracionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ comentarios?: string }>
+}) {
+  const params = await searchParams
+  const filtroSolicitado = params.comentarios as FiltroComentario | undefined
+  const filtroComentario: FiltroComentario = FILTROS_COMENTARIOS.some(
+    (filtro) => filtro.valor === filtroSolicitado
+  )
+    ? filtroSolicitado!
+    : 'reportado'
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -87,13 +109,17 @@ export default async function ModeracionPage() {
       ),
       reportes ( id, motivo, fecha )
     `)
-    .eq('estado', 'reportado')
-    .order('created_at', { ascending: true })
+    .in('estado', ['activo', 'reportado', 'eliminado'])
+    .order('created_at', { ascending: false })
 
   const todos = (documentos ?? []) as unknown as (DocumentoReportado & { estado: string })[]
   const reportados = todos.filter((d) => d.estado === 'reportado')
   const activos = todos.filter((d) => d.estado === 'activo')
-  const comentariosReportados = (comentarios ?? []) as unknown as ComentarioReportado[]
+  const todosComentarios = (comentarios ?? []) as unknown as ComentarioReportado[]
+  const comentariosFiltrados =
+    filtroComentario === 'todos'
+      ? todosComentarios
+      : todosComentarios.filter((comentario) => comentario.estado === filtroComentario)
 
   return (
     <div className="flex flex-col gap-10">
@@ -130,22 +156,42 @@ export default async function ModeracionPage() {
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h2 className="font-mono text-lg font-bold text-tinta">Comentarios reportados</h2>
+          <h2 className="font-mono text-lg font-bold text-tinta">Comentarios</h2>
           <p className="text-sm text-tinta-suave">
-            Comentarios ocultos al público que requieren revisión de moderación.
+            Consulta comentarios reportados, activos o eliminados y gestiona su estado.
           </p>
         </div>
 
-        {comentariosReportados.length === 0 ? (
+        <nav className="flex flex-wrap gap-2" aria-label="Filtro de comentarios">
+          {FILTROS_COMENTARIOS.map((filtro) => {
+            const activo = filtroComentario === filtro.valor
+
+            return (
+              <Link
+                key={filtro.valor}
+                href={`/moderacion?comentarios=${filtro.valor}`}
+                className={`rounded border px-3 py-1.5 text-sm transition ${
+                  activo
+                    ? 'border-tinta bg-tinta text-papel'
+                    : 'border-linea bg-papel text-tinta-suave hover:border-tinta hover:text-tinta'
+                }`}
+              >
+                {filtro.etiqueta}
+              </Link>
+            )
+          })}
+        </nav>
+
+        {comentariosFiltrados.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-10 text-center">
             <span className="font-mono text-3xl text-linea">✓</span>
             <p className="text-sm text-tinta-suave">
-              No hay comentarios reportados pendientes.
+              No hay comentarios en este filtro.
             </p>
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
-            {comentariosReportados.map((comentario) => {
+            {comentariosFiltrados.map((comentario) => {
               const materia = comentario.documentos?.oferta?.materia
               const carrera = materia?.carrera
 
@@ -160,6 +206,7 @@ export default async function ModeracionPage() {
                   carreraColor={carrera?.color ?? 'aula'}
                   semestre={comentario.documentos?.oferta?.semestre ?? '—'}
                   corte={comentario.documentos?.corte ?? '—'}
+                  estado={comentario.estado}
                   reportes={comentario.reportes}
                 />
               )
