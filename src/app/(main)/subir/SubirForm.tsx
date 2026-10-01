@@ -193,8 +193,9 @@ export function SubirForm({ carreras }: SubirFormProps) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span id="subir-corte-label" className="font-mono text-sm font-medium text-tinta">Corte</span</label>
-            <div className="grid grid-cols-4 gap-2" role="group" aria-labelledby="subir-corte-label">
+            <span id="subir-corte-label" className="font-mono text-sm font-medium text-tinta">Corte</span>
+            <p id="subir-corte-ayuda" className="text-xs text-tinta-suave">Indica si es Quiz, Parcial 1, Parcial 2 o Final.</p>
+            <div className="grid grid-cols-4 gap-2" role="group" aria-labelledby="subir-corte-label" aria-describedby="subir-corte-ayuda">
               {CORTES.map((c) => (
                 <button
                   key={c.value}
@@ -215,10 +216,10 @@ export function SubirForm({ carreras }: SubirFormProps) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-sm font-medium text-tinta">
+            <label htmlFor="subir-temas" className="font-mono text-sm font-medium text-tinta">
               Temas cubiertos <span className="font-normal text-tinta-suave">(opcional)</span>
             </label>
-            <TemasInput value={temas} onChange={setTemas} materiaId={materiaId} />
+            <TemasInput value={temas} onChange={setTemas} materiaId={materiaId} inputId="subir-temas" />
           </div>
 
           <div className="mt-2 flex gap-2">
