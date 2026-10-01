@@ -49,7 +49,8 @@ export function LoginForm() {
         <Link href="/">
           <Logo className="text-2xl" />
         </Link>
-        <p className="text-sm text-tinta-suave">Inicia sesión con tu correo institucional</p>
+        <h1 className="font-mono text-xl font-bold text-tinta">Inicia sesión</h1>
+        <p className="text-sm text-tinta-suave">Usa tu correo institucional para continuar.</p>
       </div>
 
       <form onSubmit={handleLogin} className="flex flex-col gap-4">
