@@ -42,7 +42,7 @@ begin
     coalesce(new.raw_user_meta_data->>'nombre', split_part(new.email, '@', 1)),
     v_carrera_id,
     v_semestre,
-    'estudiante'
+    'usuario'
   );
 
   return new;
