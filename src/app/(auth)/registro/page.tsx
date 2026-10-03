@@ -22,6 +22,7 @@ export default function RegistroPage() {
   const [carreraId, setCarreraId] = useState('')
   const [semestre, setSemestre] = useState('')
   const [password, setPassword] = useState('')
+  const [aceptaPrivacidad, setAceptaPrivacidad] = useState(false)
   const [carreras, setCarreras] = useState<Carrera[]>([])
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -70,6 +71,11 @@ export default function RegistroPage() {
       return
     }
 
+    if (!aceptaPrivacidad) {
+      setError('Debes autorizar el tratamiento de tus datos personales para crear tu cuenta.')
+      return
+    }
+
     setLoading(true)
     const supabase = createClient()
 
@@ -81,6 +87,9 @@ export default function RegistroPage() {
           nombre,
           carrera_id: carreraId,
           semestre: Number(semestre),
+          autorizacion_tratamiento_datos: true,
+          version_politica_privacidad: '2026-09-30',
+          fecha_autorizacion_tratamiento_datos: new Date().toISOString(),
         },
         emailRedirectTo: `${window.location.origin}/auth/confirm?next=/explorar`,
       },
@@ -226,6 +235,29 @@ export default function RegistroPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+          </div>
+
+          <div className="flex items-start gap-3 rounded-md border border-linea bg-papel px-3 py-3">
+            <input
+              id="acepta-privacidad"
+              name="acepta_privacidad"
+              type="checkbox"
+              checked={aceptaPrivacidad}
+              onChange={(e) => setAceptaPrivacidad(e.target.checked)}
+              required
+              className="mt-1 h-4 w-4 shrink-0 accent-lapiz-rojo"
+            />
+            <div className="flex flex-col gap-1">
+              <label htmlFor="acepta-privacidad" className="text-sm leading-5 text-tinta">
+                Autorizo el tratamiento de mis datos personales de acuerdo con la{' '}
+                <Link href="/privacidad" target="_blank" className="text-lapiz-rojo hover:underline">
+                  Política de privacidad de PARCI
+                </Link>.
+              </label>
+              <p id="privacidad-ayuda" className="text-xs leading-4 text-tinta-suave">
+                Mis datos se usarán para crear y gestionar mi cuenta, personalizar mi experiencia académica y prestar las funciones de PARCI.
+              </p>
+            </div>
           </div>
 
           {error && <p role="alert" className="text-sm text-lapiz-rojo">{error}</p>}
