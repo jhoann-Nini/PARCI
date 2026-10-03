@@ -309,6 +309,7 @@ export function ComentariosPanel({
       setEditando(false)
 
       setComentarioAEliminar(null)
+      setCargado(false)
       setConfirmacion('Comentario eliminado.')
 
     } catch {
