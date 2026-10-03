@@ -108,6 +108,8 @@ export function ComentariosPanel({
 
       const datos = await respuesta.json() as Comentario[]
 
+      console.log('Comentarios recibidos:', datos)
+
 
       setComentarios(datos)
 
