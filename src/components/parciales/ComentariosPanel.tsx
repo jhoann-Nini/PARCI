@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronUp,
   Trash2,
+  Pencil,
   AlertTriangle,
 } from 'lucide-react'
 
@@ -443,18 +444,20 @@ export function ComentariosPanel({
 
                             <button
                               type="button"
+                              title="Editar comentario"
+                              aria-label="Editar comentario"
                               onClick={() => {
                                 setEditando(true)
                                 setTexto(comentario.contenido)
                               }}
                               className="
-                                text-xs
                                 text-tinta-suave
                                 hover:text-tinta
+                                transition-colors
                               "
                             >
 
-                              Editar comentario
+                              <Pencil aria-hidden="true" className="h-3.5 w-3.5" />
 
                             </button>
 
@@ -488,6 +491,31 @@ export function ComentariosPanel({
                               <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
 
                             </button>
+
+                          )
+                        }
+
+                        {
+                          editando && (
+
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => {
+
+                                setEditando(false)
+
+                                setTexto(
+                                  propio?.contenido ?? ''
+                                )
+
+                              }}
+                            >
+
+                              Cancelar edición
+
+                            </Button>
 
                           )
                         }
