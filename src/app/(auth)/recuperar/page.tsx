@@ -48,24 +48,31 @@ export default function RecuperarPage() {
   return (
     <div className="flex min-h-dvh items-center justify-center px-4">
       <Card className="w-full max-w-sm p-8 flex flex-col gap-6">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           <Link href="/">
             <Logo className="text-2xl" />
           </Link>
           <h1 className="font-mono text-xl font-bold text-tinta">
             Recuperar contraseña
           </h1>
-          <p className="text-sm text-tinta-suave">
+          <p className="text-sm leading-relaxed text-tinta-suave">
             Te enviaremos un enlace a tu correo institucional para crear una nueva contraseña.
           </p>
         </div>
 
         {success ? (
-          <div className="flex flex-col gap-4">
-            <p className="text-sm text-tinta">
-              Si el correo está registrado, recibirás un enlace para recuperar tu contraseña.
-              Revisa también la carpeta de spam.
-            </p>
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
+              <p className="font-mono text-sm font-semibold text-tinta">
+                ¡Solicitud enviada!
+              </p>
+              <p className="text-sm leading-relaxed text-tinta">
+                Si el correo está registrado, recibirás un enlace para recuperar tu contraseña.
+              </p>
+              <p className="text-sm leading-relaxed text-tinta-suave">
+                Revisa tu bandeja de entrada y la carpeta de spam.
+              </p>
+            </div>
 
             <Link
               href="/login"
@@ -75,43 +82,45 @@ export default function RecuperarPage() {
             </Link>
           </div>
         ) : (
-          <form onSubmit={handleRecovery} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="recuperar-email"
-                className="font-mono text-sm font-medium text-tinta"
-              >
-                Correo institucional
-              </label>
-              <Input
-                id="recuperar-email"
-                name="email"
-                autoComplete="email"
-                type="email"
-                placeholder={`usuario@${DOMINIO_CORREO}`}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+          <>
+            <form onSubmit={handleRecovery} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="recuperar-email"
+                  className="font-mono text-sm font-medium text-tinta"
+                >
+                  Correo institucional
+                </label>
+                <Input
+                  id="recuperar-email"
+                  name="email"
+                  autoComplete="email"
+                  type="email"
+                  placeholder={`usuario@${DOMINIO_CORREO}`}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
 
-            {error && (
-              <p role="alert" className="text-sm text-lapiz-rojo">
-                {error}
-              </p>
-            )}
+              {error && (
+                <p role="alert" className="text-sm text-lapiz-rojo">
+                  {error}
+                </p>
+              )}
 
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Enviando…' : 'Enviar enlace'}
-            </Button>
-          </form>
+              <Button type="submit" disabled={loading}>
+                {loading ? 'Enviando…' : 'Enviar enlace'}
+              </Button>
+            </form>
+
+            <p className="text-center text-sm text-tinta-suave">
+              <Link href="/login" className="text-lapiz-rojo hover:underline">
+                Volver a iniciar sesión
+              </Link>
+            </p>
+          </>
         )}
-
-        <p className="text-center text-sm text-tinta-suave">
-          <Link href="/login" className="text-lapiz-rojo hover:underline">
-            Volver a iniciar sesión
-          </Link>
-        </p>
       </Card>
     </div>
   )
