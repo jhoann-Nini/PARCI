@@ -47,13 +47,18 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
 
   const { count: favoritos } = await supabase
     .from('favoritos')
-    .select('documento_id', { count: 'exact', head: true })
+    .select('documento_id, documentos!inner(estado)', {
+      count: 'exact',
+      head: true,
+    })
     .eq('usuario_id', user.id)
+    .eq('documentos.estado', 'activo')
 
   const { data: misDocIdsRows } = await supabase
     .from('documentos')
     .select('id')
     .eq('subido_por', user.id)
+    .neq('estado', 'eliminado')
   const misDocIds = (misDocIdsRows ?? []).map((r) => r.id)
   const subidos = misDocIds.length
 
@@ -71,8 +76,25 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
 
   const { data: favoritosRows } = await supabase
     .from('favoritos')
-    .select('documentos(id, oferta_id, corte, fecha_subida, ofertas(materia_id, semestre, materias(nombre, carreras(nombre, color))))')
+    .select(`
+      documentos!inner(
+        id,
+        oferta_id,
+        corte,
+        fecha_subida,
+        estado,
+        ofertas(
+          materia_id,
+          semestre,
+          materias(
+            nombre,
+            carreras(nombre, color)
+          )
+        )
+      )
+    `)
     .eq('usuario_id', user.id)
+    .eq('documentos.estado', 'activo')
     .order('created_at', { ascending: false })
     .limit(12)
 
@@ -90,6 +112,7 @@ export default async function PerfilPage({ searchParams }: { searchParams: Promi
         ofertas ( materia_id, semestre, materias ( nombre, carreras ( id, nombre, color ) ) )
       `)
       .eq('subido_por', user.id)
+      .neq('estado', 'eliminado')
       .order('fecha_subida', { ascending: false })
 
     const filas = (misDocumentosRows ?? []) as unknown as MiDocumentoRow[]
