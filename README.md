@@ -226,3 +226,12 @@ Son pruebas unitarias; no hay evidencia de cobertura integral de RLS, Storage o 
 - [docs/ADRs.md](./docs/ADRs.md)
 
 La documentación describe el estado versionado en `main`. No se afirma que el proyecto Supabase remoto sea idéntico si contiene cambios manuales o migraciones no aplicadas.
+
+## Estado del proyecto
+
+Última revisión de seguridad:
+- Storage privado
+- RLS activo
+- Signed URLs
+- Backups verificados
+- Validación de archivos
