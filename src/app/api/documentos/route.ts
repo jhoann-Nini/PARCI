@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
 
   if (!extensionPermitida || !mimePermitido) {
     return NextResponse.json(
-      { error: 'Tipo de archivo no permitido. Usa PDF, imágenes JPG/PNG/WEBP o documentos Office.' },
+      { error: 'Tipo de archivo no permitido. Usa PDF, imágenes JPG/PNG/WEBP, DOCX o XLSX.' },
       { status: 400 }
     )
   }

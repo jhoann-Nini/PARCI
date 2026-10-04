@@ -20,12 +20,8 @@ export const TIPOS_ARCHIVO_PERMITIDOS = [
   'image/jpeg',
   'image/png',
   'image/webp',
-  'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/vnd.ms-powerpoint',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 ] as const
 
 export const EXTENSIONES_ARCHIVO_PERMITIDAS = [
@@ -34,12 +30,8 @@ export const EXTENSIONES_ARCHIVO_PERMITIDAS = [
   '.jpeg',
   '.png',
   '.webp',
-  '.doc',
   '.docx',
-  '.xls',
   '.xlsx',
-  '.ppt',
-  '.pptx',
 ] as const
 
 // Qué MIME(s) corresponde a cada extensión — se usa para exigir que
@@ -50,17 +42,17 @@ export const MIME_POR_EXTENSION: Record<
   (typeof EXTENSIONES_ARCHIVO_PERMITIDAS)[number],
   (typeof TIPOS_ARCHIVO_PERMITIDOS)[number][]
 > = {
-  '.pdf':  ['application/pdf'],
-  '.jpg':  ['image/jpeg'],
+  '.pdf': ['application/pdf'],
+  '.jpg': ['image/jpeg'],
   '.jpeg': ['image/jpeg'],
-  '.png':  ['image/png'],
+  '.png': ['image/png'],
   '.webp': ['image/webp'],
-  '.doc':  ['application/msword'],
-  '.docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-  '.xls':  ['application/vnd.ms-excel'],
-  '.xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-  '.ppt':  ['application/vnd.ms-powerpoint'],
-  '.pptx': ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+  '.docx': [
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ],
+  '.xlsx': [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ],
 }
 
 export const ACCEPT_ARCHIVOS = EXTENSIONES_ARCHIVO_PERMITIDAS.join(',')
