@@ -1,19 +1,20 @@
 -- ============================================================
--- SEGURIDAD: buscar_documentos() debe poder consultar votos y
--- comentarios aunque sus tablas ya no permitan SELECT directo
--- desde el cliente.
+-- SEGURIDAD: buscar_documentos()
+-- ============================================================
+-- Esta migración refuerza el RPC de búsqueda después de los cambios
+-- de seguridad de votos/comentarios.
 --
--- La función se expone como RPC de solo lectura y devuelve únicamente
--- los datos necesarios para las tarjetas de parciales:
--- conteos, filtros y si el visitante ya votó.
--- No expone anon_id ni permite escribir en ninguna tabla.
+-- IMPORTANTE:
+-- La entidad profesores fue eliminada por
+-- 016_quitar_profesores.sql. Por tanto, esta función debe usar
+-- únicamente materia + semestre y no puede volver a referenciar
+-- profesores.
 -- ============================================================
 
 create or replace function public.buscar_documentos(
   p_query        text    default null,
   p_carrera_id   uuid    default null,
   p_materia_id   uuid    default null,
-  p_profesor_id  uuid    default null,
   p_semestre     text    default null,
   p_corte        text    default null,
   p_orden        text    default 'recientes',
@@ -31,8 +32,6 @@ returns table (
   semestre          text,
   materia_id        uuid,
   materia_nombre    text,
-  profesor_id       uuid,
-  profesor_nombre   text,
   carrera_id        uuid,
   carrera_nombre    text,
   carrera_color     text,
@@ -55,8 +54,6 @@ as $$
     o.semestre,
     m.id            as materia_id,
     m.nombre        as materia_nombre,
-    p.id            as profesor_id,
-    p.nombre        as profesor_nombre,
     c.id            as carrera_id,
     c.nombre        as carrera_nombre,
     c.color         as carrera_color,
@@ -72,10 +69,9 @@ as $$
         )
     ) as ya_voto
   from public.documentos d
-  join public.ofertas    o on o.id = d.oferta_id
-  join public.materias   m on m.id = o.materia_id
-  join public.profesores p on p.id = o.profesor_id
-  join public.carreras   c on c.id = m.carrera_id
+  join public.ofertas  o on o.id = d.oferta_id
+  join public.materias m on m.id = o.materia_id
+  join public.carreras c on c.id = m.carrera_id
   left join (
     select documento_id, count(*) as votos_count
     from public.votos
@@ -88,15 +84,13 @@ as $$
   ) cm on cm.documento_id = d.id
   where
     d.estado = 'activo'
-    and (p_carrera_id  is null or c.id = p_carrera_id)
-    and (p_materia_id  is null or m.id = p_materia_id)
-    and (p_profesor_id is null or p.id = p_profesor_id)
-    and (p_semestre    is null or o.semestre = p_semestre)
-    and (p_corte       is null or d.corte = p_corte)
+    and (p_carrera_id is null or c.id = p_carrera_id)
+    and (p_materia_id is null or m.id = p_materia_id)
+    and (p_semestre is null or o.semestre = p_semestre)
+    and (p_corte is null or d.corte = p_corte)
     and (
       p_query is null
       or m.nombre ilike '%' || p_query || '%'
-      or p.nombre ilike '%' || p_query || '%'
       or c.nombre ilike '%' || p_query || '%'
     )
   order by
@@ -108,12 +102,10 @@ as $$
   offset p_offset;
 $$;
 
--- El RPC es público de lectura, pero no dejamos ejecución abierta
--- a roles distintos de los clientes de PARCI.
 revoke execute on function public.buscar_documentos(
-  text, uuid, uuid, uuid, text, text, text, uuid, int, int
+  text, uuid, uuid, text, text, text, uuid, int, int
 ) from public;
 
 grant execute on function public.buscar_documentos(
-  text, uuid, uuid, uuid, text, text, text, uuid, int, int
+  text, uuid, uuid, text, text, text, uuid, int, int
 ) to anon, authenticated;
