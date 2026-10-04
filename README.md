@@ -24,6 +24,32 @@ Parci es un banco de parciales para estudiantes de la Universidad del Valle, sed
 - Cuenta Vercel para producción.
 
 Las migraciones están en `supabase/migrations/`. El repo no contiene `config.toml` ni Supabase CLI, por lo que no se asume aplicación automática de migraciones.
+# Recuperación PARCI
+
+## 1. Restaurar base de datos
+
+pg_restore \
+  --dbname=postgres \
+  parci_backup_fecha.dump
+
+
+## 2. Restaurar Storage
+
+Copiar archivos de:
+
+backups/storage/documentos
+
+al bucket:
+
+documentos
+
+
+## 3. Verificar
+
+- tablas creadas
+- RLS activo
+- funciones existentes
+- documentos visibles
 
 ## Instalación
 

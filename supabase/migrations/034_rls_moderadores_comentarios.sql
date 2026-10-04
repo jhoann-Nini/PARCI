@@ -8,3 +8,4 @@ create policy "Comentarios: moderadores ven todos"
   on public.comentarios
   for select
   using (public.is_moderador());
+

@@ -43,3 +43,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Backups locales
+backups/
+
+# Supabase local
+.supabase/
+
+# Scripts temporales de backup
+backup_storage.js
+
+# Supabase CLI temporal
+supabase/.temp/
