@@ -42,9 +42,9 @@ npm ci
 
 ### 3. Supabase
 
-Configura el proyecto usando las migraciones versionadas y el bucket `documentos`.
+Configura el proyecto usando las migraciones versionadas y crea/configura el bucket privado `documentos` según el estado definido por las migraciones.
 
-**Advertencia:** `030_seguridad_buscar_documentos.sql` es incompatible con `016_quitar_profesores.sql`: vuelve a referenciar la tabla `profesores`, que 016 elimina. Antes de aplicar todas las migraciones a una instancia nueva, revisa esa migración. Ver [ARCHITECTURE.md](./ARCHITECTURE.md).
+Las migraciones de `supabase/migrations/` son la fuente versionada del esquema. El repositorio no contiene Supabase CLI ni `config.toml`, por lo que su aplicación al proyecto remoto no se asume automática.
 
 ### 4. Variables
 
@@ -153,9 +153,9 @@ Si falla el insert de `documentos` después del upload, intenta eliminar el arch
 
 ## Descargas
 
-La migración 021 convierte `documentos` en bucket privado. `POST /api/descargas` registra la descarga y genera una signed URL de 60 segundos con `SUPABASE_SERVICE_ROLE_KEY`. Moderación usa URLs de 120 segundos.
+El bucket `documentos` es privado. `POST /api/descargas` registra el acceso y genera una signed URL de 60 segundos usando `archivo_path` y el cliente server-side con service role.
 
-**Inconsistencia actual:** `POST /api/documentos` todavía calcula `archivo_url` mediante `getPublicUrl()`, aunque el bucket es privado. El flujo efectivo de descarga usa `archivo_path` + signed URL.
+La descarga repetida del mismo documento no consume otro cupo. La regla de límite inicial es de dos documentos distintos para autores que no hayan subido material; los usuarios autenticados que ya hayan subido un documento no quedan limitados.
 
 ## Tests
 
@@ -175,10 +175,12 @@ Son pruebas unitarias; no hay evidencia de cobertura integral de RLS, Storage o 
 - [docs/ADRs.md](./docs/ADRs.md)
 - [docs/DOCUMENTACION.md](./docs/DOCUMENTACION.md)
 
-## Inconsistencias conocidas
+## Documentación
 
-1. El repositorio no permite verificar el catálogo/esquema live del proyecto Supabase ni saber qué migraciones remotas se aplicaron.
-2. `030_seguridad_buscar_documentos.sql` contradice 016 y referencia `profesores` eliminado.
-3. `docs/DOCUMENTACION.md` describe un estado histórico: bucket público, profesores y migraciones hasta 016.
-4. `archivo_url` sigue siendo generado aunque el bucket es privado.
-5. No hay integración SMTP/Resend en el código de la aplicación.
+- [ARCHITECTURE.md](./ARCHITECTURE.md)
+- [API.md](./API.md)
+- [CHANGELOG.md](./CHANGELOG.md)
+- [docs/DOCUMENTACION.md](./docs/DOCUMENTACION.md)
+- [docs/ADRs.md](./docs/ADRs.md)
+
+La documentación describe el estado versionado en `main`. No se afirma que el proyecto Supabase remoto sea idéntico si contiene cambios manuales o migraciones no aplicadas.
