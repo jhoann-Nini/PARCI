@@ -1,0 +1,47 @@
+name: PARCI CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    branches:
+      - main
+
+
+jobs:
+
+  quality-check:
+
+    runs-on: ubuntu-latest
+
+
+    steps:
+
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+
+      - name: Instalar dependencias
+        run: npm ci
+
+
+      - name: Ejecutar tests
+        run: npm run test
+
+
+      - name: Ejecutar lint
+        run: npm run lint
+
+
+      - name: Verificar build
+        run: npm run build
