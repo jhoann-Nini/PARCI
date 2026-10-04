@@ -33,11 +33,11 @@ Todas las rutas son Route Handlers de Next.js en `src/app/api`. No existe un bac
 Sin parámetros.
 
 **200**
-`@json
+```json
 [
   {"id":"uuid","nombre":"Nombre","color":"aula"}
 ]
-`@
+```
 
 **500** error de Supabase.
 
@@ -48,20 +48,20 @@ Query opcional:
 - `carrera_id`: UUID.
 
 **200**
-`@json
+```json
 [
   {"id":"uuid","nombre":"Materia","carrera_id":"uuid"}
 ]
-`@
+```
 
 **500** error de Supabase.
 
 ## POST /api/ofertas
 
 Body:
-`@json
+```json
 {"materia_id":"uuid","semestre":"2026-1"}
-`@
+```
 
 Busca primero una oferta existente por materia+semestre.
 
@@ -71,9 +71,9 @@ Busca primero una oferta existente por materia+semestre.
 - **500** error de consulta/inserción/RLS.
 
 Respuesta exitosa:
-`@json
+```json
 {"id":"uuid"}
-`@
+```
 
 ## GET /api/documentos
 
@@ -116,7 +116,7 @@ Tipos permitidos: PDF, JPG/JPEG, PNG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX. Má
 El endpoint valida extensión, MIME, tamaño, archivo vacío y firma binaria.
 
 **201**
-`@json
+```json
 {
   "id":"uuid",
   "tipo":"parcial",
@@ -124,7 +124,7 @@ El endpoint valida extensión, MIME, tamaño, archivo vacío y firma binaria.
   "fecha_subida":"2026-10-03",
   "temas":["grafos"]
 }
-`@
+```
 
 Errores:
 
@@ -152,16 +152,16 @@ Query obligatorio:
 ## POST /api/votos
 
 Body:
-`@json
+```json
 {"documento_id":"uuid","anon_id":"uuid-opcional"}
-`@
+```
 
 Si hay sesión se usa `auth.uid()`; sin sesión se necesita `anon_id`.
 
 **200**
-`@json
+```json
 {"votos_count":3,"ya_voto":false}
-`@
+```
 
 **400:** falta documento_id.  
 **500:** error RPC.
@@ -183,13 +183,13 @@ Usa `obtener_comentarios`.
 ## POST /api/comentarios
 
 Body:
-`@json
+```json
 {
   "documento_id":"uuid",
   "contenido":"Comentario",
   "anon_id":"uuid-opcional"
 }
-`@
+```
 
 Máximo 500 caracteres. `comentar_documento` hace upsert por autor+documento, por lo que editar el propio comentario no crea otra fila.
 
@@ -206,14 +206,14 @@ Errores:
 ## DELETE /api/comentarios
 
 Body:
-`@json
+```json
 {"comentario_id":"uuid","anon_id":"uuid-opcional"}
-`@
+```
 
 **200**
-`@json
+```json
 {"eliminado":true}
-`@
+```
 
 **400:** falta comentario_id.  
 **403:** no es propietario/no autorizado.
@@ -224,18 +224,18 @@ La propiedad se valida en `eliminar_comentario`.
 
 Body: exactamente uno de `documento_id` o `comentario_id`.
 
-`@json
+```json
 {
   "documento_id":"uuid",
   "motivo":"Motivo",
   "anon_id":"uuid-opcional"
 }
-`@
+```
 
 **201**
-`@json
+```json
 {"id":"uuid"}
-`@
+```
 
 **400:** objetivo inválido o motivo ausente.  
 **409:** el autor ya reportó el objetivo.  
@@ -246,25 +246,25 @@ Con 3+ reportes, la función SQL marca el documento/comentario como `reportado`.
 ## POST /api/descargas
 
 Body:
-`@json
+```json
 {"documento_id":"uuid","anon_id":"uuid-opcional"}
-`@
+```
 
 **200 permitido**
-`@json
+```json
 {"permitido":true,"url":"signed-url"}
-`@
+```
 
 **200 bloqueado**
-`@json
+```json
 {"permitido":false}
-`@
+```
 
 **400:** falta documento_id.  
 **404:** documento no encontrado/activo.  
 **500:** error RPC o Storage.
 
-La URL pública dura 60 segundos. El bucket es privado.
+La URL firmada dura 60 segundos. El bucket es privado.
 
 ## GET /api/moderacion/archivo
 
@@ -275,9 +275,9 @@ Query:
 La ruta llama a `is_moderador()`.
 
 **200**
-`@json
+```json
 {"url":"signed-url"}
-`@
+```
 
 **400:** falta ID.  
 **403:** no autorizado.  
@@ -300,9 +300,9 @@ Solo supervisor/administrador.
 ## PATCH /api/moderacion/comentarios
 
 Body:
-`@json
+```json
 {"comentario_id":"uuid","estado":"activo"}
-`@
+```
 
 Estados aceptados por la ruta: `activo` y `eliminado`.
 
@@ -316,20 +316,20 @@ Estados aceptados por la ruta: `activo` y `eliminado`.
 Sin parámetros. La autorización está dentro de `listar_palabras_prohibidas`.
 
 **200**
-`@json
+```json
 [
   {"palabra":"ejemplo","activa":true}
 ]
-`@
+```
 
 **403:** no autorizado/error RPC.
 
 ## POST /api/moderacion/palabras
 
 Body:
-`@json
+```json
 {"palabra":"ejemplo"}
-`@
+```
 
 **201:** palabra y estado.  
 **400:** palabra vacía/no string.  
@@ -338,9 +338,9 @@ Body:
 ## PATCH /api/moderacion/palabras
 
 Body:
-`@json
+```json
 {"palabra":"ejemplo","activa":false}
-`@
+```
 
 **200:** palabra actualizada.  
 **400:** body inválido.  
@@ -350,9 +350,9 @@ Body:
 ## DELETE /api/moderacion/palabras
 
 Body:
-`@json
+```json
 {"palabra":"ejemplo"}
-`@
+```
 
 **200:** palabra eliminada.  
 **400:** palabra inválida.  
@@ -369,4 +369,8 @@ No existe actualmente búsqueda por profesor: la tabla `profesores` fue eliminad
 
 ## Nota sobre el esquema y respuestas
 
-La migración `030_seguridad_buscar_documentos.sql` es inconsistente con 016 porque vuelve a referenciar `profesores`. Por eso este documento describe los endpoints a partir del código TypeScript actual, no a partir de una migración histórica incompatible.
+Las respuestas descritas aquí se basan en los Route Handlers TypeScript actuales.
+
+La función SQL `buscar_documentos()` actual utiliza el modelo sin profesores y la migración de seguridad correspondiente mantiene la misma firma de parámetros que consume `GET /api/documentos`.
+
+No existe búsqueda por profesor porque la entidad `profesores` fue eliminada del modelo.
