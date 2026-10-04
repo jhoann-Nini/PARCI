@@ -1,139 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-const ESTADOS_RESOLUCION = ['activo', 'eliminado'] as const
-type EstadoResolucion = (typeof ESTADOS_RESOLUCION)[number]
+const MAX_COMENTARIO_CHARS = 500
 
-type ComentarioResuelto = { id: string; estado: EstadoResolucion }
+type ComentarioCreado = {
+  id: string
+  contenido: string
+  created_at: string
+  updated_at: string | null
+  nombre_autor: string | null
+  es_propio: boolean
+  estado?: string
+}
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+type EliminacionComentario = { eliminado: boolean }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const documento_id = searchParams.get('documento_id')
+  const anon_id = searchParams.get('anon_id')
+  if (!documento_id) return NextResponse.json({ error: 'Falta documento_id' }, { status: 400 })
   const supabase = await createClient()
+  const { data, error } = await supabase.rpc('obtener_comentarios', {
+    p_documento_id: documento_id, p_anon_id: anon_id || null,
+  })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data)
+}
 
-  const { data: esModerador, error: rolError } = await supabase.rpc('is_moderador')
+export async function POST(request: NextRequest) {
+  const supabase = await createClient()
+  const body = await request.json()
+  const { documento_id, contenido, anon_id } = body
+  if (!documento_id || !contenido?.trim()) return NextResponse.json({ error: 'Faltan campos requeridos: documento_id, contenido' }, { status: 400 })
+  if (contenido.trim().length > MAX_COMENTARIO_CHARS) return NextResponse.json({ error: `El comentario no puede superar ${MAX_COMENTARIO_CHARS} caracteres` }, { status: 400 })
 
-  if (rolError || !esModerador) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
-  }
-
-  const { data, error } = await supabase
-    .from('comentarios')
-    .select(`
-      id,
-      contenido,
-      created_at,
-      updated_at,
-      estado,
-      perfiles:usuario_id (
-        nombre
-      ),
-      documentos:documento_id (
-        id,
-        corte,
-        oferta:ofertas (
-          semestre,
-          materia:materias (
-            nombre,
-            carrera:carreras (
-              nombre,
-              color
-            )
-          )
-        )
-      ),
-      reportes (
-        id,
-        motivo,
-        fecha
-      )
-    `)
-    .eq('estado', 'reportado')
-    .order('created_at', { ascending: true })
+  const { data: dataSinTipo, error } = await supabase.rpc('comentar_documento', {
+    p_documento_id: documento_id,
+    p_contenido: contenido.trim(),
+    p_anon_id: anon_id ?? null,
+  }).single()
 
   if (error) {
+    if (error.message.includes('COMENTARIO_PROHIBIDO')) {
+      return NextResponse.json(
+        { error: 'El comentario contiene contenido no permitido.' },
+        { status: 422 }
+      )
+    }
+
+    if (error.message.includes('COMENTARIO_SPAM')) {
+      return NextResponse.json(
+        { error: 'El comentario contiene demasiado spam o enlaces.' },
+        { status: 422 }
+      )
+    }
+
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json(data ?? [])
+  const data = dataSinTipo as ComentarioCreado
+  const moderado = data.estado === 'reportado'
+
+  return NextResponse.json(
+    {
+      ...data,
+      moderado,
+    },
+    { status: 201 }
+  )
 }
 
-// PATCH /api/moderacion/comentarios
-// Body: { comentario_id: uuid, estado: 'activo' | 'eliminado' }
-// Mantener (reportado -> activo) o eliminar (reportado|activo -> eliminado).
-//
-// La decision de negocio vive en resolver_comentario_moderacion()
-// (migracion 032): devuelve siempre exactamente una fila { id, estado }
-// o lanza una excepcion con un codigo estable. Esta ruta solo valida la
-// forma de la peticion y traduce esos codigos a codigos HTTP.
-export async function PATCH(request: NextRequest) {
-  let body: { comentario_id?: unknown; estado?: unknown } | null = null
-
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: 'El cuerpo debe ser JSON válido' }, { status: 400 })
-  }
-
-  const comentarioId = body?.comentario_id
-  const estado = body?.estado
-
-  if (
-    typeof comentarioId !== 'string' ||
-    !UUID_RE.test(comentarioId) ||
-    typeof estado !== 'string' ||
-    !(ESTADOS_RESOLUCION as readonly string[]).includes(estado)
-  ) {
-    return NextResponse.json(
-      { error: "Se requiere un comentario_id (uuid) y un estado: 'activo' o 'eliminado'" },
-      { status: 400 }
-    )
-  }
-
+export async function DELETE(request: NextRequest) {
   const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .rpc('resolver_comentario_moderacion', {
-      p_comentario_id: comentarioId,
-      p_estado: estado as EstadoResolucion,
-    })
-    .single<ComentarioResuelto>()
-
-  if (error) {
-    const mensaje = error.message ?? ''
-
-    // 42501 = permission denied for function: el rol anon no tiene EXECUTE.
-    if (mensaje.includes('NO_AUTORIZADO') || error.code === '42501') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
-    }
-
-    if (mensaje.includes('COMENTARIO_NO_ENCONTRADO')) {
-      return NextResponse.json({ error: 'El comentario no existe' }, { status: 404 })
-    }
-
-    // El comentario existe pero su estado actual no admite esa accion: otro
-    // moderador ya lo resolvio, hubo un doble clic, o ya estaba eliminado.
-    if (mensaje.includes('COMENTARIO_TRANSICION_INVALIDA')) {
-      return NextResponse.json(
-        {
-          error: 'Este comentario cambió de estado y ya no admite esa acción. Actualizamos la lista.',
-          codigo: 'COMENTARIO_TRANSICION_INVALIDA',
-        },
-        { status: 409 }
-      )
-    }
-
-    if (mensaje.includes('ESTADO_INVALIDO')) {
-      return NextResponse.json({ error: 'Estado de resolución inválido' }, { status: 400 })
-    }
-
-    console.error('[PATCH /api/moderacion/comentarios]', error)
-    return NextResponse.json(
-      { error: 'No se pudo resolver el comentario. Inténtalo de nuevo.' },
-      { status: 500 }
-    )
-  }
-
-  // { id, estado }
-  return NextResponse.json(data)
+  const body = await request.json()
+  const { comentario_id, anon_id } = body
+  if (!comentario_id) return NextResponse.json({ error: 'Falta comentario_id' }, { status: 400 })
+  const { data, error } = await supabase.rpc('eliminar_comentario', {
+    p_comentario_id: comentario_id, p_anon_id: anon_id ?? null,
+  }).single<EliminacionComentario>()
+  if (error) return NextResponse.json({ error: error.message }, { status: 403 })
+  if (!data?.eliminado) return NextResponse.json({ error: 'No tienes permiso para eliminar este comentario' }, { status: 403 })
+  return NextResponse.json({ eliminado: true })
 }
