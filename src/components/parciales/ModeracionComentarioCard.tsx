@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle, MessageSquare } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
@@ -36,8 +36,16 @@ export function ModeracionComentarioCard({
   const router = useRouter()
   const [loading, setLoading] = useState<'mantener' | 'eliminar' | null>(null)
   const [error, setError] = useState('')
+  // isPending se mantiene en true hasta que router.refresh() termina de
+  // traer los datos nuevos. Sin esto, entre la respuesta del PATCH y el
+  // refresco los botones volvian a estar activos y un segundo clic
+  // mandaba otro PATCH sobre un comentario que ya estaba resuelto.
+  const [isPending, startTransition] = useTransition()
+  const ocupado = loading !== null || isPending
 
-  async function resolver(estado: 'activo' | 'eliminado', accion: 'mantener' | 'eliminar') {
+  async function resolver(nuevoEstado: 'activo' | 'eliminado', accion: 'mantener' | 'eliminar') {
+    if (ocupado) return
+
     setError('')
     setLoading(accion)
 
@@ -45,20 +53,32 @@ export function ModeracionComentarioCard({
       const res = await fetch('/api/moderacion/comentarios', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          comentario_id: id,
-          estado,
-        }),
+        body: JSON.stringify({ comentario_id: id, estado: nuevoEstado }),
       })
 
-      const data = await res.json()
+      // Si el servidor responde algo que no es JSON (p. ej. un 500 de la
+      // plataforma), res.json() lanzaria y se mostraria "no se pudo
+      // conectar", que seria un diagnostico falso.
+      const data = (await res.json().catch(() => null)) as {
+        id?: string
+        estado?: string
+        error?: string
+      } | null
 
-      if (!res.ok) {
-        setError(data.error ?? 'No se pudo actualizar el comentario')
+      if (res.ok) {
+        startTransition(() => router.refresh())
         return
       }
 
-      router.refresh()
+      // 409: otro moderador (o un doble clic) ya lo resolvio. La tarjeta
+      // esta desactualizada, asi que ademas del mensaje se refresca.
+      if (res.status === 409) {
+        setError(data?.error ?? 'Este comentario ya fue resuelto.')
+        startTransition(() => router.refresh())
+        return
+      }
+
+      setError(data?.error ?? `No se pudo actualizar el comentario (${res.status}).`)
     } catch {
       setError('No se pudo conectar con el servidor')
     } finally {
@@ -92,20 +112,22 @@ export function ModeracionComentarioCard({
         <Badge>{corte}</Badge>
       </div>
 
-      <div className="flex flex-col gap-1.5 rounded border border-lapiz-rojo/30 bg-lapiz-rojo/5 p-2.5">
-        <p className="flex items-center gap-1.5 font-mono text-xs font-bold text-lapiz-rojo">
-          <AlertTriangle className="h-3.5 w-3.5" />
-          {reportes.length} reporte{reportes.length !== 1 ? 's' : ''}
-        </p>
+      {reportes.length > 0 && (
+        <div className="flex flex-col gap-1.5 rounded border border-lapiz-rojo/30 bg-lapiz-rojo/5 p-2.5">
+          <p className="flex items-center gap-1.5 font-mono text-xs font-bold text-lapiz-rojo">
+            <AlertTriangle className="h-3.5 w-3.5" />
+            {reportes.length} reporte{reportes.length !== 1 ? 's' : ''}
+          </p>
 
-        <ul className="flex flex-col gap-1">
-          {reportes.map((reporte) => (
-            <li key={reporte.id} className="text-xs text-tinta-suave">
-              «{reporte.motivo}»
-            </li>
-          ))}
-        </ul>
-      </div>
+          <ul className="flex flex-col gap-1">
+            {reportes.map((reporte) => (
+              <li key={reporte.id} className="text-xs text-tinta-suave">
+                «{reporte.motivo}»
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="flex items-center justify-between gap-2 text-xs">
         <span className="text-tinta-suave">Estado</span>
@@ -116,30 +138,34 @@ export function ModeracionComentarioCard({
 
       {error && <p role="alert" className="text-xs text-lapiz-rojo">{error}</p>}
 
+      {/* Transiciones que acepta el servidor:
+          reportado -> activo (Mantener) | eliminado (Eliminar)
+          activo    -> eliminado (Eliminar)
+          eliminado -> ninguna */}
       {estado !== 'eliminado' && (
         <div className="mt-auto flex gap-2 pt-1">
-        {estado === 'reportado' && (
-          <Button
-          variant="secondary"
-          size="sm"
-          disabled={loading !== null}
-          onClick={() => resolver('activo', 'mantener')}
-          className="flex-1"
-        >
-          {loading === 'mantener' ? 'Manteniendo…' : 'Mantener'}
-          </Button>
-        )}
+          {estado === 'reportado' && (
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={ocupado}
+              onClick={() => resolver('activo', 'mantener')}
+              className="flex-1"
+            >
+              {loading === 'mantener' ? 'Manteniendo…' : 'Mantener'}
+            </Button>
+          )}
 
-        <Button
-          variant="danger"
-          size="sm"
-          disabled={loading !== null}
-          onClick={() => resolver('eliminado', 'eliminar')}
-          className="flex-1"
-        >
-          {loading === 'eliminar' ? 'Eliminando…' : 'Eliminar'}
-        </Button>
-      </div>
+          <Button
+            variant="danger"
+            size="sm"
+            disabled={ocupado}
+            onClick={() => resolver('eliminado', 'eliminar')}
+            className="flex-1"
+          >
+            {loading === 'eliminar' ? 'Eliminando…' : 'Eliminar'}
+          </Button>
+        </div>
       )}
     </Card>
   )
