@@ -24,9 +24,6 @@ Parci es un banco de parciales para estudiantes de la Universidad del Valle, sed
 - Cuenta Vercel para producción.
 
 Las migraciones están en `supabase/migrations/`. El repo no contiene `config.toml` ni Supabase CLI, por lo que no se asume aplicación automática de migraciones.
-# Recuperación PARCI
-
-# Recuperación PARCI
 
 ## Backup disponible
 
