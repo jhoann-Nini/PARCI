@@ -127,6 +127,13 @@ export async function POST(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Debes iniciar sesión para subir documentos.' },
+      { status: 401 }
+    )
+  }
+
   const fileName = `${ofertaId}/${Date.now()}-${corte}${extension}`
 
   const { error: uploadError } = await supabase.storage
@@ -137,19 +144,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: uploadError.message }, { status: 500 })
   }
 
-  const { data: urlData } = supabase.storage
-    .from(STORAGE_BUCKET)
-    .getPublicUrl(fileName)
-
   const { data, error } = await supabase
     .from('documentos')
     .insert({
       oferta_id: ofertaId,
       tipo,
       corte,
-      archivo_url: urlData.publicUrl,
+      archivo_url: null,
       archivo_path: fileName,
-      subido_por: user?.id ?? null,
+      subido_por: user.id,
       temas,
     })
     .select('id, tipo, corte, fecha_subida, temas')
