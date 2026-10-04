@@ -26,30 +26,46 @@ Parci es un banco de parciales para estudiantes de la Universidad del Valle, sed
 Las migraciones están en `supabase/migrations/`. El repo no contiene `config.toml` ni Supabase CLI, por lo que no se asume aplicación automática de migraciones.
 # Recuperación PARCI
 
+# Recuperación PARCI
+
+## Backup disponible
+
+Fecha:
+2026-10-03
+
+Ubicación:
+backups/2026-10-03/
+
+
 ## 1. Restaurar base de datos
 
+Backup:
+backups/2026-10-03/database/parci.dump
+
+
+Comando:
+
+```bash
 pg_restore \
   --dbname=postgres \
-  parci_backup_fecha.dump
+  backups/2026-10-03/database/parci.dump
+```
+### 2. Restaurar Storage
 
+# Archivos:
 
-## 2. Restaurar Storage
+backups/2026-10-03/storage/documentos/
 
-Copiar archivos de:
-
-backups/storage/documentos
-
-al bucket:
+Restaurar en el bucket:
 
 documentos
 
-
-## 3. Verificar
-
-- tablas creadas
-- RLS activo
-- funciones existentes
-- documentos visibles
+### 3. Verificar
+tablas creadas
+RLS activo
+funciones existentes
+documentos visibles
+descargas funcionando
 
 ## Instalación
 
