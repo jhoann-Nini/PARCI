@@ -20,29 +20,36 @@ export function PalabrasProhibidasPanel() {
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
 
-  async function cargarPalabras() {
-    setError('')
-    setCargando(true)
-
-    try {
-      const res = await fetch('/api/moderacion/palabras')
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error ?? 'No se pudieron cargar las palabras')
-        return
-      }
-
-      setPalabras(data)
-    } catch {
-      setError('No se pudo conectar con el servidor')
-    } finally {
-      setCargando(false)
-    }
-  }
-
   useEffect(() => {
-    cargarPalabras()
+    let cancelado = false
+
+    async function cargarInicial() {
+      try {
+        const res = await fetch('/api/moderacion/palabras')
+        const data = await res.json()
+        
+        if (cancelado) return
+
+        if (!res.ok) {
+          setError(data.error ?? 'No se pudo cargar las palabras')
+          return
+        }
+
+        setPalabras(data)
+      }catch {
+        if (!cancelado) setError('No se pudo conectar con el servidor')
+      } finally {
+        if (!cancelado) {
+          setCargando(false)
+        }
+      }
+    }
+
+    cargarInicial()
+
+    return () => {
+      cancelado = true
+    }
   }, [])
 
   async function agregarPalabra() {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -68,12 +68,6 @@ export function FiltrosExplorar({
     semestreSeleccionado,
     corteSeleccionado,
   ].filter(Boolean).length
-
-  useEffect(() => {
-    if (materiaId && !materiasDisponibles.some((materia) => materia.id === materiaId)) {
-      setMateriaId('')
-    }
-  }, [materiaId, materiasDisponibles])
 
   function cambiarCarrera(id: string) {
     setCarreraId(id)
