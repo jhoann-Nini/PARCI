@@ -93,9 +93,11 @@ Versión documental basada en las funcionalidades presentes en el código actual
 - `tests/utils.test.ts`
 - `tests/validaciones.test.ts`
 
-### Problemas/inconsistencias detectados
-- `030_seguridad_buscar_documentos.sql` referencia `profesores` después de que 016 elimina esa tabla.
-- `docs/DOCUMENTACION.md` está desactualizado en bucket, profesores y alcance de migraciones.
-- `POST /api/documentos` todavía genera `archivo_url` con `getPublicUrl()` aunque el bucket es privado; el flujo seguro usa `archivo_path` y signed URLs.
-- No hay evidencia de tests de integración completos para RLS, Storage y endpoints.
-- No hay SMTP/Resend implementado en el código de la aplicación.
+### Estado documental
+
+- Documentación técnica consolidada con el estado actual de `main`.
+- Eliminadas referencias operativas a profesores como parte del modelo vigente.
+- Actualizada la descripción de Storage privado y signed URLs.
+- Alineada la documentación de API con los parámetros realmente expuestos por los Route Handlers.
+- Alineada la documentación de variables de entorno con las variables usadas por el código.
+- La documentación histórica se conserva únicamente en ADRs cuando corresponde a decisiones ya superadas.
