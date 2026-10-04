@@ -55,3 +55,7 @@ backup_storage.js
 
 # Supabase CLI temporal
 supabase/.temp/
+
+# Archivos de backup de Supabase
+archive-*/
+archive-a3GOx9/
