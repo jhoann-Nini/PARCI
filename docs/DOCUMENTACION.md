@@ -1,4 +1,7 @@
 # Documentación técnica — Parci
+Versión del documento: 1.0.0  
+Última actualización: 04/10/2026  
+Rama de referencia: main
 
 Parci es un banco de parciales para estudiantes de la Universidad del Valle, sede Tuluá. La aplicación permite explorar documentos académicos, subir material, votar, comentar, reportar contenido, guardar favoritos y realizar moderación.
 
@@ -284,7 +287,21 @@ La aplicación está preparada para:
 
 Las migraciones de Supabase se versionan en Git, pero el repositorio no contiene Supabase CLI ni `config.toml`, por lo que no se debe afirmar que GitHub aplique automáticamente las migraciones al proyecto remoto.
 
-## 16. Alcance de esta documentación
+## 16. Decisiones arquitectónicas
+
+Las decisiones importantes del proyecto se documentan en:
+
+docs/ADRs.md
+
+Incluyen:
+
+- elección de Supabase como plataforma backend;
+- uso de Next.js App Router;
+- almacenamiento privado de archivos;
+- autorización mediante funciones PostgreSQL;
+- estrategia de moderación.
+
+## 17. Alcance de esta documentación
 
 Esta documentación reemplaza descripciones históricas que todavía mencionaban profesores, Storage público o una versión anterior del esquema.
 
