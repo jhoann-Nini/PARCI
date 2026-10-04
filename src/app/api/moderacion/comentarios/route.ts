@@ -73,18 +73,17 @@ export async function PATCH(request: NextRequest) {
       p_comentario_id: comentarioId,
       p_estado: estado,
     })
-    .single()
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  if (!data) {
+  if (!data || data.length === 0) {
     return NextResponse.json(
       { error: 'El comentario ya no está reportado o no existe' },
       { status: 404 }
     )
   }
 
-  return NextResponse.json(data)
+  return NextResponse.json(data[0])
 }
