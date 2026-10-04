@@ -6,7 +6,7 @@ Describe el código y SQL presentes en `main`. El repositorio no contiene una in
 
 ## Diagrama
 
-`@mermaid
+```mermaid
 flowchart LR
  U[Usuario / navegador] --> N[Next.js 16 App Router]
  N --> P[proxy.ts + sesión]
@@ -24,7 +24,7 @@ flowchart LR
  A --> MAIL[Mailer de Supabase Auth]
  V[Vercel] --> N
  D[Docker Node 22] --> N
-`@
+```
 
 No existe backend Node/Express separado.
 
@@ -52,7 +52,7 @@ La migración 021 convierte el bucket `documentos` en privado porque una URL pú
 
 ## Flujo de subida
 
-`@mermaid
+```mermaid
 sequenceDiagram
  participant U as Usuario
  participant F as SubirForm
@@ -73,13 +73,13 @@ sequenceDiagram
  DB-->>D: documento
  D-->>F: 201
  F-->>U: éxito
-`@
+```
 
 La UI requiere sesión. El endpoint SQL/RLS conserva soporte de inserción anónima en el esquema histórico, pero no está expuesto por la interfaz de subida.
 
 ## Flujo de descarga
 
-`@mermaid
+```mermaid
 sequenceDiagram
  participant U as Usuario
  participant A as /api/descargas
@@ -98,7 +98,7 @@ sequenceDiagram
  else bloqueado
   A-->>U: permitido=false
  end
-`@
+```
 
 Regla de `018_limite_descargas.sql`: 2 documentos distintos gratis; un usuario autenticado que ya subió un documento no queda limitado; volver a descargar el mismo documento no consume otro cupo.
 
@@ -123,7 +123,7 @@ Regla de `018_limite_descargas.sql`: 2 documentos distintos gratis; un usuario a
 
 ### Relaciones
 
-`@mermaid
+```mermaid
 erDiagram
  SEDES ||--o{ CARRERAS : contiene
  CARRERAS ||--o{ MATERIAS : tiene
@@ -141,7 +141,7 @@ erDiagram
  DOCUMENTOS ||--o{ DESCARGAS : registra
  DOCUMENTOS ||--o{ FAVORITOS : guarda
  COMENTARIOS ||--o{ REPORTES : recibe
-`@
+```
 
 ### Esquema
 
@@ -256,37 +256,28 @@ Roles: `usuario`, `supervisor`, `administrador`.
 
 `buscar_documentos`, `contar_documentos`, `sugerencias_temas`, `votar_documento`, `comentar_documento`, `obtener_comentarios`, `eliminar_comentario`, `registrar_reporte`, `registrar_descarga`, `resolver_comentario_moderacion`, `listar_palabras_prohibidas`, `agregar_palabra_prohibida`, `cambiar_estado_palabra_prohibida`, `eliminar_palabra_prohibida`, `is_admin` y `is_moderador`.
 
-## Comparación con documentación previa
+## Historial del modelo
 
-No existe un archivo llamado `documentacion_fase1.md` en el repositorio actual; la búsqueda por ese nombre no encontró coincidencias. El documento disponible es `docs/DOCUMENTACION.md`.
+La tabla `profesores` pertenece a una etapa anterior del proyecto. La migración `016_quitar_profesores.sql` eliminó la tabla y `ofertas.profesor_id`, por lo que el modelo actual utiliza únicamente materia + semestre en `ofertas`.
 
-Diferencias verificables:
+El almacenamiento también evolucionó: el bucket de documentos es privado y las descargas actuales utilizan `archivo_path` y URLs firmadas de corta duración.
 
-1. Profesores: la documentación anterior describe `profesores`; 016 elimina la tabla y `ofertas.profesor_id`.
-2. Bucket: la documentación anterior describe Storage público; 021 lo convierte en privado.
-3. Descargas: el modelo actual usa `descargas`, `registrar_descarga()`, `archivo_path` y signed URLs.
-4. Temas: 017 crea texto; 019 lo convierte en `text[]`.
-5. Comentarios: ahora tienen `estado` y moderación.
-6. Palabras prohibidas: ahora son configurables.
-7. Perfil: ahora incluye `semestre`.
-8. Favoritos: existe tabla `favoritos`.
-9. 030 es inconsistente: vuelve a referenciar `profesores` después de que 016 lo elimina.
+## Almacenamiento actual
 
-## Código vs Storage
+El acceso a los archivos no depende de una URL pública. El flujo efectivo utiliza `archivo_path` y `createSignedUrl()` desde las rutas server-side.
 
-`POST /api/documentos` calcula `archivo_url` mediante `getPublicUrl()`, pero 021 hace privado el bucket. La descarga real usa `archivo_path` + signed URL. Esto debe limpiarse en una futura revisión.
+El campo `archivo_url` permanece en el modelo para compatibilidad con el esquema existente, pero no debe documentarse como mecanismo de acceso público al archivo.
 
 ## Correo
 
 No hay SMTP ni Resend implementado en el código. Supabase Auth gestiona confirmación y recuperación. `/auth/confirm` soporta `code` y `token_hash + type`.
 
-## Límite de verificación del esquema live
+## Límite de verificación del esquema remoto
 
-GitHub no permite comprobar desde este repo:
+GitHub permite verificar el código y las migraciones versionadas, pero no permite determinar desde este repositorio:
 
-- migraciones realmente aplicadas;
-- cambios manuales en Dashboard;
-- policies/functions adicionales fuera de Git;
-- si 030 llegó a ejecutarse.
+- qué migraciones fueron aplicadas realmente al proyecto Supabase;
+- qué cambios manuales existen en el Dashboard;
+- qué policies o funciones adicionales podrían existir fuera de Git.
 
-Por eso este documento no inventa un "estado live".
+Por ello, esta arquitectura describe el estado reproducible desde `main`, no una inspección del proyecto Supabase remoto.
