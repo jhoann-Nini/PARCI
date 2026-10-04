@@ -169,17 +169,17 @@ Son pruebas unitarias; no hay evidencia de cobertura integral de RLS, Storage o 
 
 ## Documentación
 
-- [ARCHITECTURE.md](./ARCHITECTURE.md)
-- [API.md](./API.md)
-- [CHANGELOG.md](./CHANGELOG.md)
+- [docs/ARCHITECTURE.md](./ARCHITECTURE.md)
+- [docs/API.md](./API.md)
+- [docs/CHANGELOG.md](./CHANGELOG.md)
 - [docs/ADRs.md](./docs/ADRs.md)
 - [docs/DOCUMENTACION.md](./docs/DOCUMENTACION.md)
 
 ## Documentación
 
-- [ARCHITECTURE.md](./ARCHITECTURE.md)
-- [API.md](./API.md)
-- [CHANGELOG.md](./CHANGELOG.md)
+- [docs/ARCHITECTURE.md](./ARCHITECTURE.md)
+- [docs/API.md](./API.md)
+- [docs/CHANGELOG.md](./CHANGELOG.md)
 - [docs/DOCUMENTACION.md](./docs/DOCUMENTACION.md)
 - [docs/ADRs.md](./docs/ADRs.md)
 
