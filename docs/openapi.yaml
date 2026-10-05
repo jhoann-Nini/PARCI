@@ -1,0 +1,276 @@
+openapi: 3.0.3
+
+info:
+  title: PARCI API
+  description: |
+    API del banco de parciales PARCI.
+
+    Permite gestionar documentos académicos,
+    comentarios, votos y reportes.
+
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local
+
+
+tags:
+  - name: Documentos
+    description: Gestión de parciales
+  - name: Comentarios
+    description: Comentarios de usuarios
+  - name: Votos
+    description: Sistema de valoración
+  - name: Reportes
+    description: Moderación de contenido
+
+
+
+paths:
+
+
+  /documentos:
+
+    post:
+
+      tags:
+        - Documentos
+
+      summary:
+        Subir un parcial
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          multipart/form-data:
+
+            schema:
+
+              type: object
+
+              required:
+                - archivo
+                - oferta_id
+                - corte
+
+              properties:
+
+                archivo:
+                  type: string
+                  format: binary
+
+                oferta_id:
+                  type: string
+                  format: uuid
+
+                corte:
+                  type: string
+
+
+      responses:
+
+        201:
+          description:
+            Documento creado correctamente
+
+
+        400:
+          description:
+            Datos incompletos
+
+
+        401:
+          description:
+            Usuario no autenticado
+
+
+
+
+  /comentarios:
+
+    post:
+
+      tags:
+        - Comentarios
+
+      summary:
+        Crear comentario
+
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          application/json:
+
+            schema:
+
+              type: object
+
+              required:
+
+                - documento_id
+                - contenido
+
+
+              properties:
+
+                documento_id:
+
+                  type: string
+
+                  format: uuid
+
+
+                contenido:
+
+                  type: string
+
+
+                anon_id:
+
+                  type: string
+
+                  format: uuid
+
+
+
+      responses:
+
+        201:
+
+          description:
+            Comentario creado
+
+
+        400:
+
+          description:
+            Campos faltantes
+
+
+        422:
+
+          description:
+            Comentario bloqueado por moderación
+
+
+
+
+
+  /votos:
+
+
+    post:
+
+      tags:
+
+        - Votos
+
+
+      summary:
+
+        Registrar voto
+
+
+      requestBody:
+
+
+        required: true
+
+
+        content:
+
+
+          application/json:
+
+
+            schema:
+
+
+              type: object
+
+
+              required:
+
+                - documento_id
+
+
+              properties:
+
+
+                documento_id:
+
+                  type: string
+
+                  format: uuid
+
+
+                anon_id:
+
+                  type: string
+
+                  format: uuid
+
+
+
+      responses:
+
+
+        200:
+
+
+          description:
+
+            Voto registrado correctamente
+
+
+        400:
+
+
+          description:
+
+            Datos inválidos
+
+
+
+
+
+  /reportes:
+
+
+    post:
+
+
+      tags:
+
+
+        - Reportes
+
+
+      summary:
+
+        Reportar documento o comentario
+
+
+      responses:
+
+
+        201:
+
+          description:
+
+            Reporte creado
+
+
+        400:
+
+          description:
+
+            Solicitud inválida
