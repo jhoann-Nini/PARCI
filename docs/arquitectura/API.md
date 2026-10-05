@@ -333,3 +333,45 @@ Lo que **no existe** (no hay ruta, ni UI) y que otros documentos del repo sugier
 - **Elegir el `tipo` de documento** (`taller`, `apunte`, `nota`) en la UI: existen en el esquema y en la API, pero el formulario siempre envía `parcial`.
 - **Paginación en la interfaz**: `/explorar` pide como máximo 24 resultados (búsqueda) o 3/6 (portada) sin botón de "ver más". Además, el enlace "Ver todos →" de la portada apunta a `/explorar?orden=recientes`, que `/explorar` **no trata como filtro** (solo `orden=utiles` lo hace), así que vuelve a mostrar la portada en lugar de un listado completo.
 - **Limpieza de archivos** en Storage cuando un documento pasa a `eliminado`.
+
+# Pruebas relacionadas
+
+Se agregaron pruebas para verificar:
+
+Votos API
+
+Archivo:
+
+tests/votos-api.test.ts
+
+Casos:
+
+Caso	      | Resultado
+Sin         | documento_id	400
+Voto        | correcto	200
+Error RPC	  | 500
+
+## Comentarios API
+Archivo:
+
+tests/comentarios-api.test.ts
+
+Casos:
+
+Caso	     | Resultado
+Campos     | faltantes	400
+Comentario | válido	201
+Comentario | prohibido	422
+
+## Documentos API
+
+Archivo:
+
+tests/documentos-api.test.ts
+
+Casos:
+
+Caso	                 |Resultado
+Datos incompletos      |	400
+Usuario no autenticado |	401
+Documento válido	     | 201
