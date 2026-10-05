@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 import { createMockSupabase } from "./mocks/supabase";
@@ -7,33 +7,21 @@ import { createClient } from "@/lib/supabase/server";
 import { POST } from "@/app/api/votos/route";
 
 
-
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
 }));
 
 
 describe("POST /api/votos", () => {
-
+ 
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   test("rechaza voto sin documento_id", async () => {
 
-    const rpcMock = vi.fn()
-      .mockReturnValue({
-        single: vi.fn()
-          .mockResolvedValue({
-            data:{
-              votos_count:1,
-              ya_voto:false
-            },
-            error:null
-          })
-      });
-
     vi.mocked(createClient).mockResolvedValue(
-      createMockSupabase({
-        rpc: rpcMock
-      }) as never
+      createMockSupabase({}) as never
     )
 
 
@@ -49,11 +37,21 @@ describe("POST /api/votos", () => {
     const response = await POST(request);
 
     const data = await response.json();
+    console.log(data)
 
 
     expect(response.status).toBe(400);
 
-    expect(data.error)
+    expect(data.error.message)
+      .toContain("Falta documento_id");
+    
+    expect(data.success)
+      .toBe(false);
+
+    expect(data.error.code)
+      .toBe("MISSING_FIELDS");
+
+    expect(data.error.message)
       .toContain("Falta documento_id");
 
   });
